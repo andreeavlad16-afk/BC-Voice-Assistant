@@ -1,0 +1,50 @@
+﻿# Dependencies
+node_modules/
+package-lock.json
+npm-debug.log
+
+# Build outputs
+dist/
+build/
+output/
+.env
+.env.local
+
+# Azure
+local.settings.json
+bin/
+obj/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Deployment scripts
+*.ps1
+*.zip
+deploy-config.json
+
+# Documentation
+*INSTRUCTIONS.md
+*DEPLOYMENT-OPTIONS.md
+*GUIDE.md
+ANALYSIS-*.md
+EXAMPLE-*.md
+FullPromptLog.md
+AI-*.md
+BUILD-*.md
+DATABASE-*.md
+EFFICIENT-*.md
+IMPLEMENTATION-*.md
+LESSONS-*.md
+BC-*.md
+AZURE-*.md
+ARCHITECTURE-*.md
+INFRASTRUCTURE.md
+DEVELOPER.md
+INSTALL-*.md
+DEPLOYMENT.md

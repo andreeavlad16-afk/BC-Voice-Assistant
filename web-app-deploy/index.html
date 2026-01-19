@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0078d4">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>BC Voice Assistant</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding-top: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        /* Voice Recording Section */
+        .voice-section {
+            text-align: center;
+        }
+
+        .record-button {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .record-button:active {
+            transform: scale(0.95);
+        }
+
+        .record-button.recording {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .record-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-text {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 10px;
+            min-height: 24px;
+        }
+
+        .status-text.recording {
+            color: #f5576c;
+            font-weight: 600;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        /* Text Input Section */
+        .text-section {
+            margin-top: 10px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Results Section */
+        .results-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .results-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .results-content {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .results-content.empty {
+            color: #999;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .results-content.success {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+
+        .results-content.error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            color: #c62828;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        .spinner.active {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Configuration Section */
+        .config-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .config-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .config-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .config-panel {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .config-panel.visible {
+            display: block;
+        }
+
+        .config-group {
+            margin-bottom: 15px;
+        }
+
+        .config-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .save-config-button {
+            width: 100%;
+            padding: 12px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .save-config-button:hover {
+            background: #45a049;
+        }
+
+        /* Install Prompt */
+        .install-prompt {
+            display: none;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .install-prompt.visible {
+            display: block;
+        }
+
+        .install-button {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Quick Examples */
+        .examples {
+            margin-top: 15px;
+        }
+
+        .examples-title {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .example-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .example-chip {
+            background: #e8eaf6;
+            color: #5c6bc0;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .example-chip:hover {
+            background: #c5cae9;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .record-button {
+                width: 100px;
+                height: 100px;
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎤 BC Voice Assistant</h1>
+            <p class="subtitle">Ask questions about your Business Central data</p>
+        </header>
+
+        <!-- Install Prompt -->
+        <div id="installPrompt" class="install-prompt">
+            <p><strong>📱 Install this app on your device!</strong></p>
+            <p style="font-size: 0.9rem; margin-top: 5px;">Get quick access from your home screen</p>
+            <button id="installButton" class="install-button">Install App</button>
+        </div>
+
+        <!-- Voice Recording Card -->
+        <div class="card voice-section">
+            <button id="recordButton" class="record-button" title="Press to start recording">
+                <span id="micIcon">🎤</span>
+            </button>
+            <div id="statusText" class="status-text">Tap to start recording</div>
+
+            <div class="divider">or type your question</div>
+
+            <div class="text-section">
+                <textarea 
+                    id="queryText" 
+                    placeholder="e.g., How many locations do we have?"
+                    rows="3"
+                ></textarea>
+                
+                <div class="examples">
+                    <div class="examples-title">Quick examples:</div>
+                    <div class="example-chips">
+                        <button class="example-chip" onclick="setQuery('How many locations?')">Locations</button>
+                        <button class="example-chip" onclick="setQuery('Show all customers')">Customers</button>
+                        <button class="example-chip" onclick="setQuery('What is the biggest sales order?')">Top order</button>
+                    </div>
+                </div>
+
+                <button id="sendButton" class="send-button">Send Query</button>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="spinner" class="spinner"></div>
+
+        <!-- Results Card -->
+        <div class="card results-section">
+            <div class="results-header">Response</div>
+            <div id="resultsContent" class="results-content empty">
+                Results will appear here...
+            </div>
+        </div>
+
+        <!-- Configuration -->
+        <div class="config-toggle">
+            <button class="config-button" onclick="toggleConfig()">⚙️ Settings</button>
+        </div>
+
+        <div class="card config-panel" id="configPanel">
+            <div class="config-group">
+                <label class="config-label">Function URL</label>
+                <input 
+                    type="text" 
+                    id="functionUrl" 
+                    class="config-input"
+                    placeholder="https://func-bcvoice-prod.azurewebsites.net"
+                >
+            </div>
+            <div class="config-group">
+                <label class="config-label">Function Key (Optional)</label>
+                <input 
+                    type="password" 
+                    id="functionKey" 
+                    class="config-input"
+                    placeholder="Leave empty for public access"
+                >
+            </div>
+            <button class="save-config-button" onclick="saveConfig()">💾 Save Settings</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const DEFAULT_CONFIG = {
+            functionUrl: 'https://func-bcvoice-prod.azurewebsites.net',
+            functionKey: '' // Leave empty if not needed
+        };
+
+        let config = { ...DEFAULT_CONFIG };
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        // Elements
+        const recordButton = document.getElementById('recordButton');
+        const statusText = document.getElementById('statusText');
+        const micIcon = document.getElementById('micIcon');
+        const sendButton = document.getElementById('sendButton');
+        const queryText = document.getElementById('queryText');
+        const resultsContent = document.getElementById('resultsContent');
+        const spinner = document.getElementById('spinner');
+
+        // Load saved configuration
+        function loadConfig() {
+            const saved = localStorage.getItem('bcVoiceConfig');
+            if (saved) {
+                config = { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
+            }
+            document.getElementById('functionUrl').value = config.functionUrl;
+            document.getElementById('functionKey').value = config.functionKey;
+        }
+
+        // Save configuration
+        function saveConfig() {
+            config.functionUrl = document.getElementById('functionUrl').value.trim();
+            config.functionKey = document.getElementById('functionKey').value.trim();
+            localStorage.setItem('bcVoiceConfig', JSON.stringify(config));
+            alert('✅ Settings saved!');
+            toggleConfig();
+        }
+
+        // Toggle configuration panel
+        function toggleConfig() {
+            const panel = document.getElementById('configPanel');
+            panel.classList.toggle('visible');
+        }
+
+        // Set example query
+        function setQuery(text) {
+            queryText.value = text;
+        }
+
+        // Initialize
+        async function init() {
+            loadConfig();
+            checkMicrophoneSupport();
+            setupPWA();
+        }
+
+        // Check microphone support
+        async function checkMicrophoneSupport() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                statusText.textContent = '⚠️ Microphone not supported';
+                recordButton.disabled = true;
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop());
+                statusText.textContent = 'Tap to start recording';
+            } catch (error) {
+                statusText.textContent = '⚠️ Microphone access denied';
+                recordButton.disabled = true;
+            }
+        }
+
+        // Record button click
+        recordButton.addEventListener('click', async () => {
+            if (isRecording) {
+                stopRecording();
+            } else {
+                await startRecording();
+            }
+        });
+
+        // Start recording
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        channelCount: 1,
+                        sampleRate: 16000
+                    } 
+                });
+
+                // Determine MIME type
+                let mimeType = 'audio/webm';
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'audio/ogg';
+                }
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'audio/wav';
+                }
+
+                mediaRecorder = new MediaRecorder(stream, { mimeType });
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: mimeType });
+                    stream.getTracks().forEach(track => track.stop());
+                    await sendVoiceQuery(audioBlob);
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                recordButton.classList.add('recording');
+                micIcon.textContent = '⏹️';
+                statusText.textContent = '🔴 Recording... (tap to stop)';
+                statusText.classList.add('recording');
+                sendButton.disabled = true;
+
+            } catch (error) {
+                console.error('Recording error:', error);
+                showError('Failed to start recording: ' + error.message);
+            }
+        }
+
+        // Stop recording
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordButton.classList.remove('recording');
+                micIcon.textContent = '🎤';
+                statusText.textContent = 'Processing...';
+                statusText.classList.remove('recording');
+            }
+        }
+
+        // Send voice query
+        async function sendVoiceQuery(audioBlob) {
+            showLoading(true);
+
+            try {
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'recording.webm');
+
+                const headers = {};
+                if (config.functionKey) {
+                    headers['x-functions-key'] = config.functionKey;
+                }
+
+                const response = await fetch(`${config.functionUrl}/api/voiceQuery`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.text();
+                showResult(result, true);
+                statusText.textContent = 'Tap to start recording';
+
+            } catch (error) {
+                console.error('Voice query error:', error);
+                showError('Failed to process voice query: ' + error.message);
+                statusText.textContent = 'Error - tap to retry';
+            } finally {
+                showLoading(false);
+                sendButton.disabled = false;
+            }
+        }
+
+        // Send text query
+        sendButton.addEventListener('click', async () => {
+            const query = queryText.value.trim();
+            if (!query) {
+                alert('Please enter a question');
+                return;
+            }
+
+            showLoading(true);
+            sendButton.disabled = true;
+
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (config.functionKey) {
+                    headers['x-functions-key'] = config.functionKey;
+                }
+
+                const response = await fetch(`${config.functionUrl}/api/query`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ query })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.text();
+                showResult(result, true);
+
+            } catch (error) {
+                console.error('Text query error:', error);
+                showError('Failed to send query: ' + error.message);
+            } finally {
+                showLoading(false);
+                sendButton.disabled = false;
+            }
+        });
+
+        // Show loading spinner
+        function showLoading(show) {
+            if (show) {
+                spinner.classList.add('active');
+                recordButton.disabled = true;
+            } else {
+                spinner.classList.remove('active');
+                recordButton.disabled = false;
+            }
+        }
+
+        // Show result
+        function showResult(text, isSuccess) {
+            resultsContent.textContent = text;
+            resultsContent.classList.remove('empty', 'error', 'success');
+            resultsContent.classList.add(isSuccess ? 'success' : 'error');
+        }
+
+        // Show error
+        function showError(message) {
+            showResult('❌ ' + message, false);
+        }
+
+        // PWA Setup
+        let deferredPrompt;
+
+        function setupPWA() {
+            // Install prompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('installPrompt').classList.add('visible');
+            });
+
+            document.getElementById('installButton').addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    console.log('App installed');
+                }
+                
+                deferredPrompt = null;
+                document.getElementById('installPrompt').classList.remove('visible');
+            });
+
+            // Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.log('Service Worker registration failed:', err);
+                });
+            }
+        }
+
+        // Enter key to send
+        queryText.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendButton.click();
+            }
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
