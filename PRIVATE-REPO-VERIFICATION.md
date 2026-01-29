@@ -22,30 +22,27 @@ cd BC-Voice-Assistant
 Run these searches - **ALL should return no results:**
 
 ```bash
-# Azure OpenAI Keys
-echo "Checking Azure OpenAI keys..."
-grep -r "DM0UFaALfoUW4oJUskgFOWc" . 2>/dev/null
-grep -r "5a8133e4939d48bc990d062ebbf0c4f0" . 2>/dev/null
+# Search for common sensitive patterns
+echo "Checking for API keys..."
+grep -r "api[_-]key" . --include="*.json" --include="*.js" --include="*.al" 2>/dev/null
 
-# Storage Keys
-echo "Checking Storage keys..."
-grep -r "jenYkEXwrhCj3lmeoQxV3bFuWJWR" . 2>/dev/null
+# Check for connection strings
+echo "Checking for connection strings..."
+grep -r "DefaultEndpointsProtocol=https" . 2>/dev/null
+grep -r "AccountKey=" . 2>/dev/null
 
-# SignalR Keys
-echo "Checking SignalR keys..."
-grep -r "a6Xct7Gy4xPF8HAHUPcGZNftS0jQVuTC2dCI6GeUncdr4oUUmCL4JQQJ99CAAC5RqLJXJ3w3AAAAASRSUjOS" . 2>/dev/null
+# Check for Azure endpoints with keys
+echo "Checking for Azure service keys..."
+grep -r "\.core\.windows\.net" . --include="*.json" 2>/dev/null | grep -v "example" | grep -v "YOUR_"
 
-# Tenant/Subscription IDs
-echo "Checking tenant info..."
-grep -r "M365x77295693" . 2>/dev/null
-grep -r "0fffce29-cf48-4967-9bba-8a7b0172b531" . 2>/dev/null
+# Check for tenant/subscription IDs (should only be in templates)
+echo "Checking for Azure tenant info..."
+grep -r "onmicrosoft\.com" . 2>/dev/null | grep -v ".example"
+grep -r "[0-9a-f]\{8\}-[0-9a-f]\{4\}-[0-9a-f]\{4\}-[0-9a-f]\{4\}-[0-9a-f]\{12\}" . --include="*.json" 2>/dev/null | grep -v "id.*:" | head -5
 
-# Resource Names
-echo "Checking resource names..."
-grep -r "stbcvoice9149" . 2>/dev/null
-grep -r "openai-bcvoice-2025" . 2>/dev/null
-grep -r "func-bcvoice-prod" . 2>/dev/null
-grep -r "signalr-bcvoice-1656" . 2>/dev/null
+# Check for base64-encoded secrets (SignalR, etc.)
+echo "Checking for base64 secrets..."
+grep -rE "[A-Za-z0-9+/]{40,}={0,2}" . --include="*.json" 2>/dev/null | grep -v "example" | grep -v "placeholder"
 ```
 
 **Expected Result:** All searches return "No matches found" or empty results
