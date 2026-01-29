@@ -98,7 +98,7 @@ done
 ┌─────────────────────────────────────────────────┐
 │        Business Central                          │
 │  ┌─────────────────────────────────────────┐    │
-│  │  Pag50213.VoiceCommandAPI                │    │
+│  │  Pag50608.NXRVoiceAssistant              │    │
 │  │  POST /api/hackathon/voiceAssistant/...  │    │
 │  └──────────────────────────────────────────┘    │
 │                    │                             │

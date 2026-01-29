@@ -27,16 +27,14 @@ codeunit 50605 "NXR Voice Assistant Mgt."
         DebugInfo: Text;
     begin
         // DEBUG: Capture original query
+        // DEBUG: Capture original query
         if Setup.Get() and Setup."Debug Mode" then
-            DebugInfo := '\\\\[DEBUG] Original Query: "' + QueryText + '"';
+            DebugInfo := '[DEBUG] Original Query: "' + QueryText + '"';
 
         // Try AI analysis first if configured
         if AIService.AnalyzeQueryWithAI(QueryText, Intent) then begin
             // AI returned structured data - use it
             if Intent."Structured Data" <> '' then begin
-                if Setup.Get() and Setup."Debug Mode" then
-                    DebugInfo += '\\[DEBUG] AI Structured Response: ' + Intent."Structured Data";
-
                 if StructuredQueryJson.ReadFrom(Intent."Structured Data") then begin
                     // Check execution mode and route appropriately
                     if StructuredQueryJson.Get('executionMode', ExecutionModeToken) then
@@ -46,34 +44,23 @@ codeunit 50605 "NXR Voice Assistant Mgt."
                     if StructuredQueryJson.Get('intent', ExecutionModeToken) then begin
                         if ExecutionModeToken.AsValue().AsText() = 'selectCompany' then begin
                             ResponseText := HandleCompanySelection(StructuredQueryJson);
-                            if Setup.Get() and Setup."Debug Mode" then
-                                ResponseText := DebugInfo + '\\' + ResponseText;
                             exit(ResponseText);
                         end;
                         if ExecutionModeToken.AsValue().AsText() = 'currentCompany' then begin
                             ResponseText := HandleCurrentCompanyQuery();
-                            if Setup.Get() and Setup."Debug Mode" then
-                                ResponseText := DebugInfo + '\\' + ResponseText;
                             exit(ResponseText);
                         end;
                     end;
-
-                    if Setup.Get() and Setup."Debug Mode" then
-                        DebugInfo += '\\[DEBUG] Execution Mode: ' + ExecutionMode;
 
                     case ExecutionMode of
                         'odata':
                             begin
                                 // Use Generic OData Executor for advanced queries
-                                if GenericODataExecutor.ExecuteODataQuery(StructuredQueryJson, ResultData, RecordCount, ResponseText) then begin
-                                    if Setup.Get() and Setup."Debug Mode" then
-                                        ResponseText := DebugInfo + '\\' + ResponseText;
-                                    exit(ResponseText);
-                                end else begin
-                                    // OData executor failed - return the error instead of falling through
-                                    if Setup.Get() and Setup."Debug Mode" then
-                                        ResponseText := DebugInfo + '\\[DEBUG] OData executor failed\\' + ResponseText
-                                    else if ResponseText = '' then
+                                if GenericODataExecutor.ExecuteODataQuery(StructuredQueryJson, ResultData, RecordCount, ResponseText) then
+                                    exit(ResponseText)
+                                else begin
+                                    // OData executor failed - return the error
+                                    if ResponseText = '' then
                                         ResponseText := 'I encountered an error processing that query with OData.';
                                     exit(ResponseText);
                                 end;
@@ -81,16 +68,11 @@ codeunit 50605 "NXR Voice Assistant Mgt."
                         'native', '':
                             begin
                                 // Use Native Dynamic Executor for standard queries
-                                if DynamicQueryExecutor.ExecuteStructuredQuery(StructuredQueryJson, ResultData, RecordCount, ResponseText) then begin
-                                    // Prepend upstream debug info
-                                    if Setup.Get() and Setup."Debug Mode" then
-                                        ResponseText := DebugInfo + ResponseText;
-                                    exit(ResponseText);
-                                end else begin
+                                if DynamicQueryExecutor.ExecuteStructuredQuery(StructuredQueryJson, ResultData, RecordCount, ResponseText) then
+                                    exit(ResponseText)
+                                else begin
                                     // Native executor failed - return error
-                                    if Setup.Get() and Setup."Debug Mode" then
-                                        ResponseText := DebugInfo + '\\[DEBUG] Native executor failed\\' + ResponseText
-                                    else if ResponseText = '' then
+                                    if ResponseText = '' then
                                         ResponseText := 'I encountered an error processing that query.';
                                     exit(ResponseText);
                                 end;
@@ -99,32 +81,15 @@ codeunit 50605 "NXR Voice Assistant Mgt."
                 end;
             end;
             // AI parsed but no structured data - use legacy executor
-            if Setup.Get() and Setup."Debug Mode" then begin
-                DebugInfo += '\\[DEBUG] AI returned no structured data - using legacy path';
-                ResponseText := ExecuteQueryAndFormatResponse(Intent, QueryText);
-                ResponseText := DebugInfo + ResponseText;
-                exit(ResponseText);
-            end else
-                exit(ExecuteQueryAndFormatResponse(Intent, QueryText));
+            exit(ExecuteQueryAndFormatResponse(Intent, QueryText));
         end;
 
         // Fallback to pattern matching if AI not available
-        if Setup.Get() and Setup."Debug Mode" then
-            DebugInfo += '\\[DEBUG] AI not available - using pattern matching';
-
-        if not AnalyzeQueryIntent(QueryText, Intent) then begin
-            if Setup.Get() and Setup."Debug Mode" then
-                exit(DebugInfo + '\\I didn''t understand that query. Try asking about customers, sales orders, or items.');
+        if not AnalyzeQueryIntent(QueryText, Intent) then
             exit('I didn''t understand that query. Try asking about customers, sales orders, or items.');
-        end;
 
         // Execute the query and return response
-        if Setup.Get() and Setup."Debug Mode" then begin
-            ResponseText := ExecuteQueryAndFormatResponse(Intent, QueryText);
-            ResponseText := DebugInfo + ResponseText;
-            exit(ResponseText);
-        end else
-            exit(ExecuteQueryAndFormatResponse(Intent, QueryText));
+        exit(ExecuteQueryAndFormatResponse(Intent, QueryText));
     end;
 
     local procedure AnalyzeQueryIntent(QueryText: Text; var Intent: Record "NXR Voice Query Intent" temporary): Boolean

@@ -23,9 +23,9 @@ codeunit 50628 "NXR OData Schema Discovery"
 
         // BC OData metadata endpoints
         MetadataUrl := GetODataMetadataUrl();
-        
+
         Client.DefaultRequestHeaders.Add('Accept', 'application/xml');
-        
+
         if not Client.Get(MetadataUrl, Response) then
             Error('Failed to connect to OData metadata endpoint');
 
@@ -33,9 +33,9 @@ codeunit 50628 "NXR OData Schema Discovery"
             Error('OData metadata request failed with status: %1', Response.HttpStatusCode);
 
         Response.Content.ReadAs(MetadataXml);
-        
+
         Schema := ParseODataMetadata(MetadataXml);
-        
+
         exit(Schema);
     end;
 
@@ -43,16 +43,20 @@ codeunit 50628 "NXR OData Schema Discovery"
     var
         BaseUrl: Text;
     begin
-        // Get BC OData endpoint from environment
+        // Get BC OData endpoint from CURRENT environment using session context
+        // This uses the current user's authentication - no external credentials needed
         // Standard BC OData v4: /api/v2.0/$metadata
         BaseUrl := GetUrl(ClientType::ODataV4);
-        
+
         if BaseUrl = '' then
-            Error('OData endpoint not available');
+            Error('OData endpoint not available. Ensure you are connected to Business Central.');
 
         // Remove any trailing slashes and add $metadata
         BaseUrl := DelChr(BaseUrl, '>', '/');
-        exit(BaseUrl + '/$metadata');
+        BaseUrl := BaseUrl + '/$metadata';
+
+        // Schema discovery always uses current user session, not external bcODataBaseURL
+        exit(BaseUrl);
     end;
 
     local procedure ParseODataMetadata(MetadataXml: Text): Text
@@ -64,14 +68,14 @@ codeunit 50628 "NXR OData Schema Discovery"
         Properties: Text;
     begin
         Schema := 'BUSINESS CENTRAL ODATA SCHEMA:\n\n';
-        
+
         // Parse EntityType elements from EDMX metadata
         EntityTypes := ExtractEntityTypes(MetadataXml);
-        
+
         foreach EntityType in EntityTypes do begin
             EntityName := ExtractEntityName(EntityType);
             Properties := ExtractEntityProperties(EntityType);
-            
+
             if (EntityName <> '') and (Properties <> '') then
                 Schema += EntityName + ': ' + Properties + '\n';
         end;
@@ -93,7 +97,7 @@ codeunit 50628 "NXR OData Schema Discovery"
         // Find all <EntityType Name="..."> elements
         SearchText := '<EntityType Name="';
         StartPos := 1;
-        
+
         repeat
             StartPos := MetadataXml.IndexOf(SearchText, StartPos);
             if StartPos > 0 then begin
@@ -123,7 +127,7 @@ codeunit 50628 "NXR OData Schema Discovery"
 
         NameStartPos += 6; // Skip 'Name="'
         NameEndPos := EntityType.IndexOf('"', NameStartPos);
-        
+
         if NameEndPos = 0 then
             exit('');
 
@@ -142,16 +146,16 @@ codeunit 50628 "NXR OData Schema Discovery"
         // Extract all <Property Name="..."> elements
         StartPos := 1;
         PropertyCount := 0;
-        
+
         repeat
             StartPos := EntityType.IndexOf('<Property Name="', StartPos);
             if StartPos > 0 then begin
                 StartPos += 16; // Skip '<Property Name="'
                 EndPos := EntityType.IndexOf('"', StartPos);
-                
+
                 if EndPos > 0 then begin
                     PropertyName := CopyStr(EntityType, StartPos, EndPos - StartPos);
-                    
+
                     // Skip metadata properties
                     if not IsMetadataProperty(PropertyName) then begin
                         if PropertyCount > 0 then
@@ -159,7 +163,7 @@ codeunit 50628 "NXR OData Schema Discovery"
                         Properties += PropertyName;
                         PropertyCount += 1;
                     end;
-                    
+
                     StartPos := EndPos + 1;
                 end else
                     StartPos := 0;

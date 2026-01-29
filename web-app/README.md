@@ -101,9 +101,11 @@ You can host these files on:
 
 ### Update Function URL
 
+⚠️ **IMPORTANT:** The default URL shown below is a placeholder/example from the original deployment. You must replace it with your own Azure Function URL after deployment.
+
 By default, the app uses:
 ```
-https://func-bcvoice-prod.azurewebsites.net
+https://func-bcvoice-prod.azurewebsites.net  ⚠️ EXAMPLE ONLY
 ```
 
 To change:
@@ -167,8 +169,8 @@ Settings are saved in browser localStorage.
 
 ### "Network error"
 - Check internet connection
-- Verify Function URL in Settings
-- Test Function directly: `https://func-bcvoice-prod.azurewebsites.net/api/query`
+- Verify Function URL in Settings (must be YOUR deployed function, not the example)
+- Test Function directly: Replace `https://func-bcvoice-prod.azurewebsites.net/api/query` with your actual Function URL
 
 ### App not installing
 - **iOS:** Only works in Safari, not Chrome

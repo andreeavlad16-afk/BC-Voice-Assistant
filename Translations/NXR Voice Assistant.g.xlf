@@ -549,12 +549,12 @@
           <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Action OpenVoiceAssistant - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 1996928243 - Action 4151470544 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Discover all available OData entities (queries, tables, pages) and cache for AI queries</source>
+          <source>Build schema from OData $metadata (field-level), cache for AI queries</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Action RefreshSchema - Property ToolTip</note>
         </trans-unit>
         <trans-unit id="Page 1996928243 - Action 4151470544 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Refresh OData Schema</source>
+          <source>Refresh Schema from OData Metadata</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Action RefreshSchema - Property Caption</note>
         </trans-unit>
