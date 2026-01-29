@@ -1,0 +1,5 @@
+﻿Field,Value
+Azure OpenAI Endpoint,https://openai-bcvoice-prod-6lwg2qhbnsydo.openai.azure.com/
+Azure OpenAI Deployment,gpt-4o-mini
+Azure OpenAI API Version,2024-08-06
+Transcription Proxy URL,https://func-bcvoice-8939.azurewebsites.net/api/transcribe

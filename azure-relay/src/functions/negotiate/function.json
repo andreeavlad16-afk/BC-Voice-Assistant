@@ -1,0 +1,27 @@
+﻿{
+    "scriptFile":  "index.js",
+    "bindings":  [
+                     {
+                         "name":  "req",
+                         "authLevel":  "anonymous",
+                         "methods":  [
+                                         "post",
+                                         "get"
+                                    {
+                                         "name":  "res",
+                                         "direction":  "out",
+                                         "type":  "http"
+                                     }
+                         "name":  "$return",
+                         "direction":  "out",
+                         "type":  "http"
+                     },
+                     {
+                         "name":  "connectionInfo",
+                         "hubName":  "bcvoice",
+                         "direction":  "in",
+                         "connectionStringSetting":  "AzureSignalRConnectionString",
+                         "type":  "signalRConnectionInfo"
+                     }
+                 ]
+}

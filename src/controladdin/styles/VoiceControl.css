@@ -1,0 +1,220 @@
+/* Voice Control Add-in Styles */
+
+.voice-control-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    color: white;
+    min-height: 250px;
+}
+
+.status-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.status {
+    font-size: 18px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.status.ready {
+    background-color: rgba(76, 175, 80, 0.3);
+    border: 2px solid #4CAF50;
+}
+
+.status.listening {
+    background-color: rgba(33, 150, 243, 0.3);
+    border: 2px solid #2196F3;
+    animation: pulse 1.5s infinite;
+}
+
+.status.speaking {
+    background-color: rgba(255, 152, 0, 0.3);
+    border: 2px solid #FF9800;
+}
+
+.status.processing {
+    background-color: rgba(156, 39, 176, 0.3);
+    border: 2px solid #9C27B0;
+}
+
+.status.error {
+    background-color: rgba(244, 67, 54, 0.3);
+    border: 2px solid #F44336;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+.microphone-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.microphone-icon svg {
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.status.listening ~ .microphone-icon svg {
+    animation: bounce 0.6s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.info-section {
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.info-text {
+    font-size: 14px;
+    margin: 0 0 10px 0;
+    opacity: 0.9;
+}
+
+.examples {
+    font-size: 12px;
+    font-weight: 600;
+    margin: 10px 0 5px 0;
+    opacity: 0.8;
+}
+
+.examples-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.examples-list li {
+    margin: 3px 0;
+}
+
+.examples-list li:before {
+    content: "💬 ";
+    margin-right: 5px;
+}
+
+/* Text Input Section */
+.text-input-section {
+    width: 100%;
+    max-width: 400px;
+    margin: 15px 0;
+}
+
+.text-input-container {
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    padding: 5px 5px 5px 15px;
+    backdrop-filter: blur(10px);
+}
+
+.text-input-container input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    min-width: 0;
+}
+
+.text-input-container input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.text-input-container button {
+    background: rgba(255, 255, 255, 0.25);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: background 0.2s;
+}
+
+.text-input-container button:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.text-input-container button:active {
+    transform: scale(0.95);
+}
+
+/* Microphone hint for tap */
+.mic-hint {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+/* AI Status indicators */
+.ai-status {
+    font-size: 12px;
+    margin-top: 10px;
+    opacity: 0.8;
+}
+
+.ai-status.ai-active {
+    color: #4CAF50;
+}
+
+.ai-status.ai-fallback {
+    color: #FFC107;
+}
+
+.input-mode {
+    font-size: 11px;
+    margin-top: 5px;
+    opacity: 0.7;
+}
+
+.input-mode.cloud {
+    color: #03A9F4;
+}
+
+.input-mode.native {
+    color: #8BC34A;
+}
+
+.input-mode.unavailable {
+    color: #FF5722;
+}

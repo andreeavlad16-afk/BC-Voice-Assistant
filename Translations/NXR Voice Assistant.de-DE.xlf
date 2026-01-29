@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en-US" target-language="de-DE" original="NXR Voice Assistant">
+    <body>
+      <group id="body">
+        <trans-unit id="Table 3504740714 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>NXR Voice Assistant Setup</source>
+          <target>NXR Sprachassistent Einrichtung</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 3504740714 - Field 2879900210 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>AI Backend Type</source>
+          <target>KI-Backend-Typ</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field AI Backend Type - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 3504740714 - Field 1295806467 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>API Endpoint</source>
+          <target>API-Endpunkt</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field API Endpoint - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 3504740714 - Field 2721219307 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Model Name</source>
+          <target>Modellname</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Model Name - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 968797986 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>NXR Voice Assistant</source>
+          <target>NXR Sprachassistent</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 968797986 - Action 3843368223 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Setup</source>
+          <target>Einrichtung</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action Setup - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 968797986 - Control 1836114298 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Voice Query</source>
+          <target>Sprachabfrage</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control Voice Query - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 2697506918 - EnumValue 0 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Customer</source>
+          <target>Kunde</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Customer - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 2697506918 - EnumValue 5 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item</source>
+          <target>Artikel</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Item - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 2697506918 - EnumValue 3 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Vendor</source>
+          <target>Kreditor</target>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Vendor - Property Caption</note>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+</xliff>

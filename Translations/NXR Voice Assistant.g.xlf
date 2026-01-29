@@ -1,0 +1,949 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en-US" target-language="en-US" original="NXR Voice Assistant">
+    <body>
+      <group id="body">
+        <trans-unit id="Table 1996928243 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>NXR Voice Assistant Setup</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 3150303488 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>AI Backend Type</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field AI Backend Type - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 132998021 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>OpenAI-compatible endpoint (e.g., http://localhost:1234/v1 for LocalLLM, or https://your-resource.openai.azure.com for Azure)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field API Endpoint - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 132998021 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>API Endpoint</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field API Endpoint - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 357668407 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Indicates whether an API key has been securely stored</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field API Key Set - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 357668407 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>API Key Configured</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field API Key Set - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 4040157093 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure OpenAI API version (e.g., 2024-08-06)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Azure API Version - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 4040157093 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure API Version</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Azure API Version - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 685945889 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure OpenAI deployment name (only for Azure backend)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Azure Deployment Name - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 685945889 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure Deployment Name</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Azure Deployment Name - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 2015956164 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Business Central OData API base URL (e.g., https://api.businesscentral.dynamics.com/v2.0/tenant/env/api/v2.0/). Leave blank to use current environment.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field BC OData Base URL - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 2015956164 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>BC OData Base URL</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field BC OData Base URL - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 3714772726 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Show debug messages during query execution (for troubleshooting)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Debug Mode - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 3714772726 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Debug Mode</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Debug Mode - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 2053342392 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>If AI backend fails, use basic pattern matching</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Fallback to Pattern Matching - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 2053342392 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Fallback to Pattern Matching</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Fallback to Pattern Matching - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 3898104680 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Maximum tokens for AI response (default: 500)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Max Tokens - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 3898104680 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Max Tokens</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Max Tokens - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 2853950796 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Model to use (e.g., gpt-4o, gpt-4o-mini, gpt-3.5-turbo)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Model Name - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 2853950796 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Model Name</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Model Name - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 2309998811 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Cached schema from OData $metadata endpoint. Refreshed via Refresh Schema action.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field OData Schema Context - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 2309998811 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>OData Schema Context</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field OData Schema Context - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 1663593181 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Primary Key</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Primary Key - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 301954114 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Timestamp of last schema refresh from OData</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Schema Last Updated - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 301954114 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Schema Last Updated</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Schema Last Updated - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 198981022 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Disable voice output (silent mode - responses shown as text only). Useful for testing without disturbing others.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Text Only Mode - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 198981022 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Text Only Mode</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Text Only Mode - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 933139923 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure Function URL for audio transcription (e.g., https://your-function.azurewebsites.net/api/transcribe). Required for BC Mobile App voice input.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Transcription Proxy URL - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 933139923 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Transcription Proxy URL</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Transcription Proxy URL - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1554631008 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>NXR Voice Query Intent</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Query Intent - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1554631008 - Field 995090288 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Date Filter</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Query Intent - Field Date Filter - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1554631008 - Field 31514389 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Date Range</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Query Intent - Field Date Range - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1554631008 - Field 3247369565 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Entity</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Query Intent - Field Entity - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1554631008 - Field 883711285 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Entry No.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Query Intent - Field Entry No. - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1554631008 - Field 1096121841 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Query Text</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Query Intent - Field Query Text - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1554631008 - Field 1610212676 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Specific Filter</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Query Intent - Field Specific Filter - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1554631008 - Field 1618285499 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Structured Data (JSON)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Query Intent - Field Structured Data - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1554631008 - Field 3569963191 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Top N Records</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Query Intent - Field Top N - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Codeunit 1765194449 - Method 2784695680 - NamedType 450852048" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Show me my top 5 customers</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Codeunit NXR Voice AI Service - Method TestQueryAI - NamedType TestQuery</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Voice Assistant - Ask me anything about your data</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 4126130292 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Configuration</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control Configuration - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 3885107409 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure Function App URL for advanced AI processing (only needed if Advanced AI is enabled)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control BackendUrl - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 3885107409 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure Backend URL (Optional)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control BackendUrl - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 3589050159 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Enable Azure OpenAI for more sophisticated query understanding. Requires Azure setup.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control UseAdvancedAI - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 3589050159 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Use Advanced AI (Azure OpenAI)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control UseAdvancedAI - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 2765653753 - Property 1968111052" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Your questions and answers appear here. Use Clear History to start fresh.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control ConversationHistory - Property InstructionalText</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 2765653753 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Your Conversation</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control ConversationHistory - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 4247083565 - Property 1968111052" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Type your question and press Enter or click Submit</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control TextInput - Property InstructionalText</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 4247083565 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Or Type Your Question</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control TextInput - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 3965684682 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Type your question here and press Enter or click Submit. Ask about customers, items, vendors, sales orders, or invoices.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control TypedQuery - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 3965684682 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Your Question</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control TypedQuery - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 1603347563 - Property 1968111052" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Click Start Listening to speak your question, or type it below and click Submit.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control VoiceControl - Property InstructionalText</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Control 1603347563 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Voice &amp; Text Input</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Control VoiceControl - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 3360167549 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Clear the conversation history to start fresh</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action ClearHistory - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 3360167549 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Clear Conversation</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action ClearHistory - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 2952299124 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Show examples of questions you can ask</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action ShowExamples - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 2952299124 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>💡 Example Questions</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action ShowExamples - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 3785951547 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Click to start voice input. Speak your question clearly.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action StartListening - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 3785951547 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>🎤 Start Listening</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action StartListening - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 882987931 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Click to stop voice input.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action StopListening - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 882987931 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>⏹️ Stop Listening</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action StopListening - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 551484730 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Submit your typed question</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action SubmitQuery - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 551484730 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>📤 Submit Question</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action SubmitQuery - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 3178025796 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Open Voice Assistant settings to configure AI backend, debug mode, and text-only mode</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action ToggleConfig - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1243042602 - Action 3178025796 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>⚙️ Settings</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant - Action ToggleConfig - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Voice Assistant Setup</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - NamedType 2631801809" size-unit="char" translate="yes" xml:space="preserve">
+          <source>⚠ On-Premises Only: Local LLM requires the BC server to reach your LLM endpoint. This only works with on-premises BC installations where the server can access your local network. For BC Cloud (SaaS), use OpenAI or Azure OpenAI instead.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - NamedType LocalLLMWarningText</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - NamedType 589370535" size-unit="char" translate="yes" xml:space="preserve">
+          <source>For mobile voice control, configure the Transcription Function URL above. The PWA will use this for speech-to-text conversion.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - NamedType MobileNoteText</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - NamedType 1467036166" size-unit="char" translate="yes" xml:space="preserve">
+          <source>On-device AI uses Google Gemini Nano via Chrome's window.ai API. This works on Chrome 127+ desktop only. On mobile devices, pattern matching is used automatically. No configuration needed here.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - NamedType OnDeviceInfoText</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 141792440 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure OpenAI Settings</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control AzureSettings - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 4040157093 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure OpenAI API version</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control Azure API Version - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 685945889 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>The deployment name in Azure OpenAI</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control Azure Deployment Name - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 383395618 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Your Azure OpenAI API key (securely stored)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control AzureApiKey - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 383395618 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>API Key</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control AzureApiKey - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2309875094 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Your Azure OpenAI resource endpoint (e.g., https://your-resource.openai.azure.com)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control AzureEndpoint - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2309875094 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure Endpoint</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control AzureEndpoint - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 3959436582 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>API Key Status</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control AzureKeyStatus - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 3658102719 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Maximum tokens for AI response</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control AzureMaxTokens - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2729265546 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Override model name if different from deployment</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control AzureModel - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2729265546 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Model (Optional)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control AzureModel - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2382004944 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Debug &amp; Troubleshooting</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control DebugSettings - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 3714772726 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Enable to show debug messages during query execution (useful for troubleshooting AI query interpretation)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control Debug Mode - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 301954114 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Last time OData schema was refreshed from BC APIs. Use Refresh OData Schema action to update.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control Schema Last Updated - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 198981022 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Disable voice output (silent mode). Responses will only appear as text. Useful for testing without disturbing others.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control Text Only Mode - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2445482498 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>AI Backend Configuration</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control General - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 3150303488 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Select the AI backend to use for query parsing</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control AI Backend Type - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2053342392 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>If AI backend fails or is unavailable, fall back to basic pattern matching</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control Fallback to Pattern Matching - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 3770815383 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Local LLM Settings</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control LocalLLMSettings - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2812450774 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>API key if your local LLM requires authentication</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control LocalApiKey - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2812450774 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>API Key (Optional)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control LocalApiKey - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2333505730 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Local LLM endpoint (e.g., http://yourserver:1234/v1 for LM Studio)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control LocalEndpoint - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2333505730 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>LLM Endpoint</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control LocalEndpoint - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 1218375846 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Important</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control LocalLLMWarning - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 1462468638 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Model name if required by your local LLM</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control LocalModel - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 1462468638 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Model Name</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control LocalModel - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 598432071 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Mobile App Settings (BC Mobile App)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control MobileSettings - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 587211596 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source></source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control MobileNote - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 933139923 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure Function URL for audio transcription. Required for voice input on BC Mobile App. Format: https://your-function.azurewebsites.net/api/transcribe</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control Transcription Proxy URL - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 2356115649 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>On-Device AI Information</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control OnDeviceInfo - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 909555507 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Note</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control OnDeviceNote - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 554400947 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>OpenAI Settings</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control OpenAISettings - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 3898104680 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Maximum tokens for AI response</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control Max Tokens - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 1532391053 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Your OpenAI API key (securely stored)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control OpenAIApiKey - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 1532391053 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>API Key</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control OpenAIApiKey - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 1345906241 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>API Key Status</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control OpenAIKeyStatus - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 363490477 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>OpenAI model to use (e.g., gpt-4o, gpt-4o-mini, gpt-3.5-turbo)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control OpenAIModel - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 363490477 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Model</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control OpenAIModel - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Action 3370348682 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Clear API Key</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Action ClearApiKey - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Action 1454322402 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Open Voice Assistant</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Action OpenVoiceAssistant - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Action 4151470544 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Discover all available OData entities (queries, tables, pages) and cache for AI queries</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Action RefreshSchema - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Action 4151470544 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Refresh OData Schema</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Action RefreshSchema - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Action 4263468516 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Test Connection</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Action TestConnection - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1180360215 - Control 2683860767 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Entry No.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Command API - Control entryNo - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1180360215 - Control 2159047821 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Error Message</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Command API - Control errorMessage - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1180360215 - Control 746050217 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Query Text</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Command API - Control queryText - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1180360215 - Control 4076340114 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Response Text</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Command API - Control responseText - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1180360215 - Control 3704045979 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Structured Data</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Command API - Control structuredData - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1180360215 - Control 2431436109 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Success</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Command API - Control success - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 2621124560 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>AI Backend Type</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control aiBackendType - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 1820223773 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>API Endpoint</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control apiEndpoint - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 1331024709 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure API Version</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control azureAPIVersion - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 834918777 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure Deployment Name</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control azureDeploymentName - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 1743121100 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>BC OData Base URL</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control bcODataBaseURL - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 1379014678 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Debug Mode</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control debugMode - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 423721936 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Fallback to Pattern Matching</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control fallbackToPatternMatching - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 3995966096 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Max Tokens</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control maxTokens - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 2516050300 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Model Name</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control modelName - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 637582037 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Primary Key</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control primaryKey - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 621104862 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Text Only Mode</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control textOnlyMode - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 595653111 - Control 1064763187 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Transcription Proxy URL</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control transcriptionProxyURL - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 1599674164 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>AI Backend Type</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR AI Backend Type - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 1599674164 - EnumValue 3850558471 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Azure OpenAI Service</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR AI Backend Type - EnumValue AzureOpenAI - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 1599674164 - EnumValue 2924457596 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Local LLM (OpenAI Compatible)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR AI Backend Type - EnumValue LocalLLM - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 1599674164 - EnumValue 3371220206 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>None (Pattern Matching Only)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR AI Backend Type - EnumValue None - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 1599674164 - EnumValue 1924434339 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>On-Device AI (Google AI Edge)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR AI Backend Type - EnumValue OnDeviceAI - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 1599674164 - EnumValue 762538288 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>OpenAI API</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR AI Backend Type - EnumValue OpenAI - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 136605331 - EnumValue 4113880790 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Last Month</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Date Range - EnumValue LastMonth - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 136605331 - EnumValue 3508097258 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Last Week</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Date Range - EnumValue LastWeek - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 136605331 - EnumValue 3371220206 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>None</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Date Range - EnumValue None - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 136605331 - EnumValue 569928554 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>This Month</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Date Range - EnumValue ThisMonth - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 136605331 - EnumValue 4279574262 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>This Week</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Date Range - EnumValue ThisWeek - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 136605331 - EnumValue 1290630539 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>This Year</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Date Range - EnumValue ThisYear - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1033019516 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Assembly Order</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue AssemblyOrder - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 2663384385 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Bank Account</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue BankAccount - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3639302818 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Bank Account Ledger Entry</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue BankAccountLedgerEntry - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3993128796 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Contact</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Contact - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3660640596 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Country/Region</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue CountryRegion - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3561154705 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Currency</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Currency - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1994964448 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Customer</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Customer - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 693291367 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Customer Ledger Entry</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue CustomerLedgerEntry - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1498446062 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Employee</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Employee - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1716211490 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Fixed Asset</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue FixedAsset - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1065034950 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>G/L Account</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue GLAccount - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 4220596153 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>G/L Entry</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue GLEntry - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3276313895 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Item - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 2140734087 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item Category</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue ItemCategory - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1719057576 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Item Ledger Entry</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue ItemLedgerEntry - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 2818324089 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Job</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Job - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1095395178 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Job Ledger Entry</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue JobLedgerEntry - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1813241800 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Job Planning Line</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue JobPlanningLine - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3617483718 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Job Task</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue JobTask - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3891454143 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Location</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Location - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 200753951 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Payment Method</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue PaymentMethod - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 4257751337 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Payment Terms</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue PaymentTerms - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3369611183 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Production Order</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue ProductionOrder - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1156622152 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Purchase Credit Memo</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue PurchaseCreditMemo - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 783370822 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Purchase Invoice</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue PurchaseInvoice - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1640572759 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Purchase Order</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue PurchaseOrder - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 2277685387 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Purchase Quote</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue PurchaseQuote - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1185733643 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Purchaser</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Purchaser - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 691125313 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Purchase Receipt</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue PurchaseReceipt - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 2293466993 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Purchase Return Order</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue PurchaseReturnOrder - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 348912950 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Resource</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Resource - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 4275230785 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Sales Credit Memo</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue SalesCreditMemo - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 927944371 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Sales Invoice</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue SalesInvoice - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3617415722 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Sales Order</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue SalesOrder - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3108187119 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Salesperson</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Salesperson - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 647151006 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Sales Quote</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue SalesQuote - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1932774032 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Sales Return Order</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue SalesReturnOrder - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3005226812 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Sales Shipment</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue SalesShipment - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 4258502013 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Service Order</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue ServiceOrder - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 3490036921 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Shipment Method</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue ShipmentMethod - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1267759397 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Shipping Agent</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue ShippingAgent - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 2355023495 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Transfer Order</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue TransferOrder - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 2550710665 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Value Entry</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue ValueEntry - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 1936001480 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Vendor</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue Vendor - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 451973043 - EnumValue 4104438143 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Vendor Ledger Entry</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum NXR Voice Entity Type - EnumValue VendorLedgerEntry - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="PermissionSet 1243042602 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>NXR Voice Assistant</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">PermissionSet NXR Voice Assistant - Property Caption</note>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+</xliff>

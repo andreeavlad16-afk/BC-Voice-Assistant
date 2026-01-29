@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AzureBackend", "AzureBackend", "{835A943D-FD74-42EC-729B-A1A1A00FF1BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BCVoiceAssistant", "AzureBackend\BCVoiceAssistant.csproj", "{6CC057E4-A8E1-22DA-7B3C-FE1E64B9FB7D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6CC057E4-A8E1-22DA-7B3C-FE1E64B9FB7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6CC057E4-A8E1-22DA-7B3C-FE1E64B9FB7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6CC057E4-A8E1-22DA-7B3C-FE1E64B9FB7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CC057E4-A8E1-22DA-7B3C-FE1E64B9FB7D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6CC057E4-A8E1-22DA-7B3C-FE1E64B9FB7D} = {835A943D-FD74-42EC-729B-A1A1A00FF1BF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {72FA1A16-7609-4EBD-836F-85AD2A467702}
+	EndGlobalSection
+EndGlobal

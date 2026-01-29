@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0078d4">
+    <meta name="description" content="Voice Assistant for Microsoft Dynamics 365 Business Central">
+    
+    <title>BC Voice Assistant</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>🎤 BC Voice Assistant</h1>
+            <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
+        </header>
+
+        <!-- Settings Panel (hidden by default) -->
+        <div id="settingsPanel" class="settings-panel hidden">
+            <h2>Connection Settings</h2>
+            <div class="form-group">
+                <label for="bcEnvironment">BC Environment URL</label>
+                <input type="url" id="bcEnvironment" placeholder="https://businesscentral.dynamics.com/tenant/environment" />
+            </div>
+            <div class="form-group">
+                <label for="clientId">Azure AD Client ID</label>
+                <input type="text" id="clientId" placeholder="Your App Registration Client ID" />
+            </div>
+            <div class="form-group">
+                <label for="tenantId">Azure AD Tenant ID</label>
+                <input type="text" id="tenantId" placeholder="Your Azure AD Tenant ID" />
+            </div>
+            <div class="form-group">
+                <label for="relayUrl">Real-Time Relay URL (optional)</label>
+                <input type="url" id="relayUrl" placeholder="https://your-function.azurewebsites.net" />
+                <small class="form-hint">Azure Functions URL for real-time connection</small>
+            </div>
+            <div class="button-group">
+                <button id="saveSettings" class="btn btn-primary">Save & Connect</button>
+                <button id="closeSettings" class="btn btn-secondary">Cancel</button>
+            </div>
+            <div id="connectionStatus" class="connection-status"></div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Status indicator -->
+            <div id="status" class="status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text">Tap microphone to start</span>
+            </div>
+
+            <!-- Conversation history -->
+            <div id="conversation" class="conversation">
+                <div class="message system">
+                    <p>Welcome! Tap the microphone and ask me about your Business Central data.</p>
+                    <p class="hint">Try: "Show me top 5 customers" or "What items did Cannon Group order?"</p>
+                </div>
+            </div>
+
+            <!-- Voice visualization -->
+            <div id="visualizer" class="visualizer hidden">
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+                <div class="pulse-ring"></div>
+            </div>
+        </main>
+
+        <!-- Footer with mic button -->
+        <footer class="app-footer">
+            <!-- Text input fallback -->
+            <div class="text-input-container">
+                <input type="text" id="textInput" placeholder="Type a question..." />
+                <button id="sendTextBtn" class="send-btn" aria-label="Send">➤</button>
+            </div>
+            
+            <!-- Main mic button -->
+            <button id="micButton" class="mic-button" aria-label="Start listening">
+                <svg class="mic-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+                <span class="mic-label">Tap to speak</span>
+            </button>
+        </footer>
+    </div>
+
+    <!-- MSAL Library for Azure AD Authentication -->
+    <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
+    
+    <!-- SignalR for real-time communication -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    
+    <script src="signalr-client.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

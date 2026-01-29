@@ -1,0 +1,19 @@
+﻿{
+    "scriptFile":  "index.js",
+    "bindings":  [
+                     {
+                         "name":  "req",
+                         "authLevel":  "anonymous",
+                         "methods":  [
+                                         "post"
+                                     ],
+                         "direction":  "in",
+                         "type":  "httpTrigger"
+                     },
+                    {
+                         "name":  "res",
+                         "direction":  "out",
+                         "type":  "http"
+                     }
+                 ]
+}

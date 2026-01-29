@@ -1,0 +1,38 @@
+{
+  "id": "147cd133-31b7-47fd-8a2e-757602c6dd91",
+  "name": "NXR Voice Assistant",
+  "publisher": "Nexer Enterprise Applications UK",
+  "version": "2.1.4.5",
+  "brief": "Voice-activated assistant for Business Central Mobile",
+  "description": "Voice-activated agent that allows users to query Business Central data using voice commands and receive spoken responses",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [],
+  "screenshots": [],
+  "platform": "27.0.0.0",
+  "application": "27.0.0.0",
+  "idRanges": [
+    {
+      "from": 50200,
+      "to": 50299
+    },
+    {
+      "from": 50600,
+      "to": 50699
+    }
+  ],
+  "features": [
+    "NoImplicitWith",
+    "TranslationFile"
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": true,
+    "includeSourceInSymbolFile": true
+  },
+  "runtime": "14.0",
+  "target": "Cloud"
+}

@@ -10,8 +10,12 @@ output/
 .env
 .env.local
 
-# Azure
+# Azure & Credentials
 local.settings.json
+appsettings.json
+appsettings.*.json
+*.settings.json
+deployment-config.json
 bin/
 obj/
 
@@ -23,15 +27,26 @@ obj/
 .DS_Store
 Thumbs.db
 
-# Deployment scripts
+# Deployment artifacts
 *.ps1
 *.zip
-deploy-config.json
+deploy-out/
+deploy-*/
+func-logs/
+func-logs*/
+azure-relay-deploy-temp/
+.snapshots/
 
-# Documentation
+# Build artifacts
+# Keep latest release for hackathon submission
+*.app
+!Nexer Enterprise Applications UK_NXR Voice Assistant_2.1.4.3.app
+.alpackages/
+.altestrunner/
+
+# Documentation (internal/dev only)
 *INSTRUCTIONS.md
 *DEPLOYMENT-OPTIONS.md
-*GUIDE.md
 ANALYSIS-*.md
 EXAMPLE-*.md
 FullPromptLog.md
@@ -48,3 +63,18 @@ INFRASTRUCTURE.md
 DEVELOPER.md
 INSTALL-*.md
 DEPLOYMENT.md
+TOMORROW-*.md
+QUERY-*.md
+TRANSCRIBE-*.md
+WHISPER-*.md
+TROUBLESHOOTING-*.md
+TEST-*.md
+REFACTORING-*.md
+REBRANDING-*.md
+NXR-*.md
+HARDCODED-*.md
+ODATA-*.md
+SCHEMA-*.md
+DYNAMIC-*.md
+QUICK-*.md
+PROJECT-*.md
