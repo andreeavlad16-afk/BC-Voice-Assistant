@@ -1045,8 +1045,6 @@ codeunit 50607 "NXR Voice AI Service"
         RequestJson.Add('messages', MessagesArray);
         RequestJson.Add('temperature', 0.7);  // Higher temperature for creative suggestions
         RequestJson.Add('max_tokens', 150);
-
-        exit;
     end;
 
     local procedure PrepareRequestFromJson(var RequestContent: HttpContent; RequestJson: JsonObject)
