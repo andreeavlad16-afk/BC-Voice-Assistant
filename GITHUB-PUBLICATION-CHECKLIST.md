@@ -123,9 +123,9 @@ git clone https://github.com/YOUR-USERNAME/bc-voice-assistant.git
 cd bc-voice-assistant
 
 # Search for any credentials that might have slipped through
-git log --all --full-history --source --pretty=format: --name-only | sort | uniq | xargs grep -l "DM0UFaALfoUW4oJUskgFOWc" 2>/dev/null
-git log --all --full-history --source --pretty=format: --name-only | sort | uniq | xargs grep -l "jenYkEXwrhCj3lmeoQxV3bFuWJWR" 2>/dev/null
-git log --all --full-history --source --pretty=format: --name-only | sort | uniq | xargs grep -l "M365x77295693" 2>/dev/null
+# Replace PATTERN with your actual credential patterns to check for
+git log --all --full-history --source --pretty=format: --name-only | sort | uniq | xargs grep -l "YOUR_API_KEY_PATTERN" 2>/dev/null
+git log --all --full-history --source --pretty=format: --name-only | sort | uniq | xargs grep -l "YOUR_SECRET_PATTERN" 2>/dev/null
 
 # Should return no results
 ```
