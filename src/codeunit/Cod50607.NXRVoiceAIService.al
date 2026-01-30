@@ -27,10 +27,9 @@ codeunit 50607 "NXR Voice AI Service"
     /// </summary>
     procedure AnalyzeQueryWithHistory(QueryText: Text; ConversationHistory: JsonArray; var Intent: Record "NXR Voice Query Intent" temporary): Boolean
     var
-        Setup: Record "NXR Voice Assistant Setup";
         DebugInfo: Text;
     begin
-        if not Setup.Get() then
+        if not LoadSetup() then
             exit(false);
 
         if Setup."Debug Mode" then
@@ -55,7 +54,6 @@ codeunit 50607 "NXR Voice AI Service"
     /// </summary>
     procedure GenerateFollowUpSuggestions(QueryText: Text; ResponseText: Text; StructuredData: Text; ConversationHistory: JsonArray): Text
     var
-        Setup: Record "NXR Voice Assistant Setup";
         Client: HttpClient;
         RequestContent: HttpContent;
         Response: HttpResponseMessage;
@@ -66,7 +64,7 @@ codeunit 50607 "NXR Voice AI Service"
         MessagesArray: JsonArray;
         PromptText: Text;
     begin
-        if not Setup.Get() then
+        if not LoadSetup() then
             exit('');
 
         if Setup."AI Backend Type" <> Setup."AI Backend Type"::AzureOpenAI then
@@ -92,11 +90,11 @@ codeunit 50607 "NXR Voice AI Service"
 
         // Build request with conversation history
         BuildFollowUpRequest(PromptText, ConversationHistory, RequestJson);
-        
+
         AzureUrl := BuildAzureUrl();
         RequestJson.WriteTo(ResponseTextResult);
         RequestContent.WriteFrom(ResponseTextResult);
-        
+
         AddAzureAuthHeader(Client);
         AddContentTypeHeader(RequestContent);
 
