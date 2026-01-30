@@ -208,6 +208,7 @@ page 50608 "NXR Voice Assistant"
                 trigger OnAction()
                 begin
                     ConversationText := '';
+                    Clear(ConversationHistory);
                     AddToConversation('Welcome! Ask me about your Business Central data.');
                     AddToConversation('Try: "Who are my top 5 customers?" or "Show me orders from this week"');
                     CurrPage.Update(false);
@@ -222,6 +223,7 @@ page 50608 "NXR Voice Assistant"
         SpeechTranscription: Codeunit "NXR Voice Speech Transcription";
         Setup: Record "NXR Voice Assistant Setup";
         ConversationText: Text;
+        ConversationHistory: JsonArray;
         TypedQueryText: Text;
         BackendServiceUrl: Text;
         BCWebServiceUrl: Text;
@@ -306,7 +308,12 @@ page 50608 "NXR Voice Assistant"
         StructuredQuery: JsonObject;
         RawQuery: Text;
         StructuredToken: JsonToken;
+        Setup: Record "NXR Voice Assistant Setup";
     begin
+        // DEBUG: Log input type
+        if Setup.Get() and Setup."Debug Mode" then
+            AddToConversation('[DEBUG] Input received: "' + InputText + '"');
+
         // Try to parse as JSON (enhanced control add-in sends structured data)
         if TryParseJson(InputText, JsonPayload) then begin
             // Extract raw query for display
@@ -316,28 +323,21 @@ page 50608 "NXR Voice Assistant"
 
             // Add user input to conversation
             AddToConversation('You: ' + RawQuery);
+            AddToHistory('user', RawQuery);
 
-            // Check if we have structured query from on-device AI
-            if JsonPayload.Get('structured', StructuredToken) then begin
-                if StructuredToken.IsObject() then begin
-                    StructuredQuery := StructuredToken.AsObject();
-                    Response := ProcessStructuredQuery(StructuredQuery);
-                end else begin
-                    // Token is not an object, use legacy processing
-                    Response := VoiceAssistantMgt.ProcessQuery(RawQuery, BackendServiceUrl, BCWebServiceUrl);
-                end;
-            end else begin
-                // Fallback to legacy processing
-                Response := VoiceAssistantMgt.ProcessQuery(RawQuery, BackendServiceUrl, BCWebServiceUrl);
-            end;
+            // ALWAYS use AI processing with conversation history
+            // Client-side parsing creates bad filters (e.g., "the" becomes City filter)
+            Response := VoiceAssistantMgt.ProcessQueryWithHistory(RawQuery, ConversationHistory, BackendServiceUrl, BCWebServiceUrl);
         end else begin
             // Legacy mode: plain text input
             AddToConversation('You: ' + InputText);
-            Response := VoiceAssistantMgt.ProcessQuery(InputText, BackendServiceUrl, BCWebServiceUrl);
+            AddToHistory('user', InputText);
+            Response := VoiceAssistantMgt.ProcessQueryWithHistory(InputText, ConversationHistory, BackendServiceUrl, BCWebServiceUrl);
         end;
 
         // Add response to conversation
         AddToConversation('Assistant: ' + Response);
+        AddToHistory('assistant', Response);
 
         // Send response back to control for speech output
         if IsControlReady then begin
@@ -401,6 +401,19 @@ page 50608 "NXR Voice Assistant"
 
         // Force page update to show latest content (simulates auto-scroll)
         CurrPage.Update(false);
+    end;
+
+    local procedure AddToHistory(Role: Text; Content: Text)
+    var
+        MessageObj: JsonObject;
+    begin
+        MessageObj.Add('role', Role);
+        MessageObj.Add('content', Content);
+        ConversationHistory.Add(MessageObj);
+        
+        // Keep only last 10 messages (5 exchanges) to avoid token limits
+        if ConversationHistory.Count() > 10 then
+            ConversationHistory.RemoveAt(0);
     end;
 
     local procedure LoadConfiguration()

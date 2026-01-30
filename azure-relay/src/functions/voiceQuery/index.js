@@ -7,16 +7,15 @@
 const fetch = require('node-fetch');
 
 /**
- * Call BC Voice API
+ * Call BC Voice API with function key authentication
  */
-async function callBCVoiceAPI(queryText, accessToken) {
-    const apiUrl = `${process.env.BC_ENVIRONMENT_URL}/api/hackathon/voiceAssistant/v1.0/voiceCommands`;
+async function callBCVoiceAPI(queryText, functionKey) {
+    const apiUrl = `${process.env.BC_ENVIRONMENT_URL}/api/hackathon/voiceAssistant/v1.0/voiceCommands?code=${functionKey}`;
     
     const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
             queryText: queryText
@@ -50,8 +49,17 @@ module.exports = async function (context, invocationContext) {
             }]
         }];
         
-        // In production, you'd get BC access token here and call BC API
-        // For now, send a simple response
+        // Try to call BC API if configured
+        let responseData = { query: queryText };
+        if (process.env.BC_ENVIRONMENT_URL && process.env.BC_FUNCTION_KEY) {
+            try {
+                responseData = await callBCVoiceAPI(queryText, process.env.BC_FUNCTION_KEY);
+            } catch (bcError) {
+                context.log(`⚠️ BC API call failed: ${bcError.message}`);
+                // Fall back to echo response
+                responseData = { echo: queryText, error: bcError.message };
+            }
+        }
         
         context.bindings.signalRMessages = [{
             connectionId: connectionId,
@@ -59,8 +67,8 @@ module.exports = async function (context, invocationContext) {
             arguments: [{
                 requestId,
                 success: true,
-                responseText: `Echo: ${queryText}`,
-                structuredData: { query: queryText }
+                responseText: responseData.responseText || `Received: ${queryText}`,
+                structuredData: responseData
             }]
         }];
         

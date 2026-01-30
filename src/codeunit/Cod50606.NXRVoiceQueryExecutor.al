@@ -117,6 +117,7 @@ codeunit 50606 "NXR Voice Query Executor"
         OrderJson: JsonObject;
         StartDate: Date;
         EndDate: Date;
+        TopN: Integer;
     begin
         SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
 
@@ -132,6 +133,14 @@ codeunit 50606 "NXR Voice Query Executor"
         if Intent."Specific Filter" <> '' then
             SalesHeader.SetFilter("No.", '@' + Intent."Specific Filter" + '*');
 
+        TopN := Intent."Top N";
+        if IsLatestQuery(Intent."Query Text") then begin
+            SalesHeader.SetCurrentKey("Order Date");
+            SalesHeader.Ascending(false);
+            if TopN = 0 then
+                TopN := 1;
+        end;
+
         // Execute query
         if not SalesHeader.FindSet() then
             exit(true);
@@ -139,7 +148,7 @@ codeunit 50606 "NXR Voice Query Executor"
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if (Intent."Top N" > 0) and (RecordCount > Intent."Top N") then
+            if (TopN > 0) and (RecordCount > TopN) then
                 break;
 
             Clear(OrderJson);
@@ -201,6 +210,7 @@ codeunit 50606 "NXR Voice Query Executor"
         InvoiceJson: JsonObject;
         StartDate: Date;
         EndDate: Date;
+        TopN: Integer;
     begin
         // Apply date filters
         if Intent."Date Filter" <> 0D then
@@ -214,6 +224,14 @@ codeunit 50606 "NXR Voice Query Executor"
         if Intent."Specific Filter" <> '' then
             SalesInvoiceHeader.SetFilter("No.", Intent."Specific Filter");
 
+        TopN := Intent."Top N";
+        if IsLatestQuery(Intent."Query Text") then begin
+            SalesInvoiceHeader.SetCurrentKey("Posting Date");
+            SalesInvoiceHeader.Ascending(false);
+            if TopN = 0 then
+                TopN := 1;
+        end;
+
         // Execute query
         if not SalesInvoiceHeader.FindSet() then
             exit(true);
@@ -221,7 +239,7 @@ codeunit 50606 "NXR Voice Query Executor"
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if (Intent."Top N" > 0) and (RecordCount > Intent."Top N") then
+            if (TopN > 0) and (RecordCount > TopN) then
                 break;
 
             Clear(InvoiceJson);
@@ -577,6 +595,7 @@ codeunit 50606 "NXR Voice Query Executor"
         ResultArray: JsonArray;
         OrderJson: JsonObject;
         StartDate, EndDate : Date;
+        TopN: Integer;
     begin
         PurchaseHeader.SetRange("Document Type", PurchaseHeader."Document Type"::Order);
         if Intent."Date Filter" <> 0D then
@@ -586,12 +605,20 @@ codeunit 50606 "NXR Voice Query Executor"
             PurchaseHeader.SetRange("Order Date", StartDate, EndDate);
         end;
 
+        TopN := Intent."Top N";
+        if IsLatestQuery(Intent."Query Text") then begin
+            PurchaseHeader.SetCurrentKey("Order Date");
+            PurchaseHeader.Ascending(false);
+            if TopN = 0 then
+                TopN := 1;
+        end;
+
         if not PurchaseHeader.FindSet() then exit(true);
 
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if (Intent."Top N" > 0) and (RecordCount > Intent."Top N") then break;
+            if (TopN > 0) and (RecordCount > TopN) then break;
             Clear(OrderJson);
             OrderJson.Add('no', PurchaseHeader."No.");
             OrderJson.Add('orderDate', Format(PurchaseHeader."Order Date"));
@@ -635,6 +662,7 @@ codeunit 50606 "NXR Voice Query Executor"
         ResultArray: JsonArray;
         InvoiceJson: JsonObject;
         StartDate, EndDate : Date;
+        TopN: Integer;
     begin
         if Intent."Date Filter" <> 0D then
             PurchInvHeader.SetRange("Posting Date", Intent."Date Filter")
@@ -643,12 +671,20 @@ codeunit 50606 "NXR Voice Query Executor"
             PurchInvHeader.SetRange("Posting Date", StartDate, EndDate);
         end;
 
+        TopN := Intent."Top N";
+        if IsLatestQuery(Intent."Query Text") then begin
+            PurchInvHeader.SetCurrentKey("Posting Date");
+            PurchInvHeader.Ascending(false);
+            if TopN = 0 then
+                TopN := 1;
+        end;
+
         if not PurchInvHeader.FindSet() then exit(true);
 
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if (Intent."Top N" > 0) and (RecordCount > Intent."Top N") then break;
+            if (TopN > 0) and (RecordCount > TopN) then break;
             Clear(InvoiceJson);
             InvoiceJson.Add('no', PurchInvHeader."No.");
             InvoiceJson.Add('postingDate', Format(PurchInvHeader."Posting Date"));
@@ -660,6 +696,22 @@ codeunit 50606 "NXR Voice Query Executor"
 
         ResultData.Add('purchaseInvoices', ResultArray);
         exit(true);
+    end;
+
+    local procedure IsLatestQuery(QueryText: Text): Boolean
+    var
+        QueryLower: Text;
+    begin
+        QueryLower := LowerCase(QueryText);
+
+        // Exclude date range phrases like "last month/week/year"
+        if (StrPos(QueryLower, 'last month') > 0) or (StrPos(QueryLower, 'last week') > 0) or (StrPos(QueryLower, 'last year') > 0) or (StrPos(QueryLower, 'last 30 days') > 0) then
+            exit(false);
+
+        if (StrPos(QueryLower, 'most recent') > 0) or (StrPos(QueryLower, 'latest') > 0) or (StrPos(QueryLower, 'last') > 0) then
+            exit(true);
+
+        exit(false);
     end;
 
     local procedure QueryPurchaseCreditMemos(Intent: Record "NXR Voice Query Intent" temporary; var ResultData: JsonObject; var RecordCount: Integer): Boolean

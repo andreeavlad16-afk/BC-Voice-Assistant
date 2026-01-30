@@ -138,7 +138,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         foreach CustomerNo in CustomerNos do begin
             if Customer.Get(CustomerNo) then begin
                 RecordCount += 1;
-                if RecordCount > TopN then
+                if RecordCount >= TopN then
                     break;
 
                 Clear(CustomerJson);
@@ -240,7 +240,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         foreach ItemNo in ItemNos do begin
             if Item.Get(ItemNo) then begin
                 RecordCount += 1;
-                if RecordCount > TopN then
+                if RecordCount >= TopN then
                     break;
 
                 Clear(ItemJson);
@@ -346,7 +346,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         foreach VendorNo in VendorNos do begin
             if Vendor.Get(VendorNo) then begin
                 RecordCount += 1;
-                if RecordCount > TopN then
+                if RecordCount >= TopN then
                     break;
 
                 Clear(VendorJson);
@@ -431,7 +431,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         foreach ItemNo in ItemNos do begin
             if Item.Get(ItemNo) then begin
                 RecordCount += 1;
-                if RecordCount > TopN then
+                if RecordCount >= TopN then
                     break;
 
                 Clear(ItemJson);
@@ -461,30 +461,1009 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
     // SIMPLE ENTITY QUERIES
     // ============================================================================
     local procedure ExecuteSimpleQuery(PrimaryEntity: Text; QueryJson: JsonObject; var ResultData: JsonObject; var RecordCount: Integer; var ResponseText: Text): Boolean
+    var
+        TableNo: Integer;
+        GroupByToken: JsonToken;
     begin
-        case PrimaryEntity of
-            'Customer':
-                exit(QueryCustomers(QueryJson, ResultData, RecordCount, ResponseText));
-            'Item':
-                exit(QueryItems(QueryJson, ResultData, RecordCount, ResponseText));
-            'Vendor':
-                exit(QueryVendors(QueryJson, ResultData, RecordCount, ResponseText));
-            'Employee':
-                exit(QueryEmployees(QueryJson, ResultData, RecordCount, ResponseText));
-            'SalesOrder':
-                exit(QuerySalesOrders(QueryJson, ResultData, RecordCount, ResponseText));
-            'SalesInvoice':
-                exit(QuerySalesInvoices(QueryJson, ResultData, RecordCount, ResponseText));
-            'Location':
-                exit(QueryLocations(QueryJson, ResultData, RecordCount, ResponseText));
-            'PurchaseOrder':
-                exit(QueryPurchaseOrders(QueryJson, ResultData, RecordCount, ResponseText));
-            else begin
-                ResponseText := 'I don''t know how to query that type of data yet.';
+        // Check if this is a GROUP BY query
+        if QueryJson.Get('groupBy', GroupByToken) then begin
+            // Route to grouped aggregation executor
+            TableNo := GetTableNumber(PrimaryEntity);
+            if TableNo = 0 then begin
+                ResponseText := StrSubstNo('Unknown entity type: %1', PrimaryEntity);
                 exit(false);
+            end;
+            exit(ExecuteGroupedQuery(TableNo, PrimaryEntity, QueryJson, ResultData, RecordCount, ResponseText));
+        end;
+
+        // Map entity name to table number
+        TableNo := GetTableNumber(PrimaryEntity);
+        if TableNo = 0 then begin
+            ResponseText := StrSubstNo('Unknown entity type: %1', PrimaryEntity);
+            exit(false);
+        end;
+
+        // Use generic query executor for all entities
+        exit(ExecuteGenericQuery(TableNo, PrimaryEntity, QueryJson, ResultData, RecordCount, ResponseText));
+    end;
+
+    local procedure GetTableNumber(EntityName: Text): Integer
+    begin
+        case EntityName of
+            'Customer':
+                exit(DATABASE::Customer);
+            'Vendor':
+                exit(DATABASE::Vendor);
+            'Item':
+                exit(DATABASE::Item);
+            'Employee':
+                exit(DATABASE::Employee);
+            'Location':
+                exit(DATABASE::Location);
+            'SalesOrder', 'Sales Order', 'SalesHeader', 'Sales Header':
+                exit(DATABASE::"Sales Header");
+            'SalesLine', 'Sales Line':
+                exit(DATABASE::"Sales Line");
+            'SalesInvoice', 'Sales Invoice', 'SalesInvoiceHeader':
+                exit(DATABASE::"Sales Invoice Header");
+            'PurchaseOrder', 'Purchase Order', 'PurchaseHeader', 'Purchase Header':
+                exit(DATABASE::"Purchase Header");
+            'PurchaseLine', 'Purchase Line':
+                exit(DATABASE::"Purchase Line");
+            'BankAccount', 'Bank Account':
+                exit(DATABASE::"Bank Account");
+            'Dimension':
+                exit(DATABASE::Dimension);
+            'DimensionValue', 'Dimension Value':
+                exit(DATABASE::"Dimension Value");
+            'G/L Entry', 'GLEntry':
+                exit(DATABASE::"G/L Entry");
+            else
+                exit(0);
+        end;
+    end;
+
+    local procedure ExecuteGenericQuery(TableNo: Integer; EntityName: Text; QueryJson: JsonObject; var ResultData: JsonObject; var RecordCount: Integer; var ResponseText: Text): Boolean
+    var
+        RecRef: RecordRef;
+        ResultArray: JsonArray;
+        RecordJson: JsonObject;
+        TopN: Integer;
+        QueryType: Text;
+        Setup: Record "NXR Voice Assistant Setup";
+        DebugJson: Text;
+    begin
+        RecRef.Open(TableNo);
+
+        // Check for count-only query
+        QueryType := GetJsonText(QueryJson, 'queryType');
+        if QueryType = 'count' then begin
+            RecordCount := RecRef.Count();
+            RecRef.Close();
+            ResultData.Add('count', RecordCount);
+            ResponseText := StrSubstNo('There are %1 %2 records in the database.', RecordCount, EntityName);
+            exit(true);
+        end;
+
+        // Apply filters from JSON
+        ApplyGenericFilters(QueryJson, RecRef);
+
+        // Apply sorting
+        ApplyGenericSorting(QueryJson, RecRef, EntityName);
+
+        // Get top N limit
+        TopN := GetJsonInteger(QueryJson, 'top');
+        if TopN = 0 then
+            TopN := 10; // Default limit
+
+        // Execute query
+        if not RecRef.FindSet() then begin
+            RecRef.Close();
+            ResponseText := StrSubstNo('No %1 records found matching your criteria.', EntityName);
+            RecordCount := 0;
+            exit(true);
+        end;
+
+        // Build result array
+        RecordCount := 0;
+        repeat
+            RecordCount += 1;
+            Clear(RecordJson);
+
+            // Add key fields dynamically based on entity
+            BuildRecordJson(RecRef, EntityName, RecordJson);
+            ResultArray.Add(RecordJson);
+
+            if RecordCount >= TopN then
+                break;
+        until RecRef.Next() = 0;
+
+        RecRef.Close();
+
+        // Post-query sort if sorting by FlowField
+        SortResultArrayIfNeeded(ResultArray, QueryJson, RecRef.Number());
+
+        ResultData.Add(LowerCase(EntityName) + 's', ResultArray);
+        ResultData.Add('count', RecordCount);
+
+        // Generate intelligent response text based on query type
+        ResponseText := GenerateResponseText(EntityName, RecordCount, TopN, ResultArray, QueryJson);
+
+        exit(true);
+    end;
+
+    local procedure ExecuteGroupedQuery(TableNo: Integer; EntityName: Text; QueryJson: JsonObject; var ResultData: JsonObject; var RecordCount: Integer; var ResponseText: Text): Boolean
+    var
+        RecRef: RecordRef;
+        GroupKeys: Dictionary of [Text, JsonObject];
+        GroupKey: Text;
+        GroupFieldNames: List of [Text];
+        GroupFieldName: Text;
+        AggFieldName: Text;
+        AggFunction: Text;
+        AggAlias: Text;
+        AggToken: JsonToken;
+        GroupData: JsonObject;
+        ResultArray: JsonArray;
+        EmptyArray: JsonArray;
+        SortedGroups: List of [Text];
+        SortField: Text;
+        SortDir: Text;
+        TopN: Integer;
+        i: Integer;
+    begin
+        // Parse groupBy fields
+        if not ParseGroupByFields(QueryJson, GroupFieldNames) then begin
+            ResponseText := 'GROUP BY query must specify at least one groupBy field.';
+            exit(false);
+        end;
+
+        // Open table and apply filters
+        RecRef.Open(TableNo);
+        ApplyGenericFilters(QueryJson, RecRef);
+
+        // Iterate all matching records and build groups
+        if RecRef.FindSet() then begin
+            repeat
+                // Build group key from groupBy field values
+                GroupKey := BuildGroupKey(RecRef, GroupFieldNames);
+
+                // Get or create group data
+                if not GroupKeys.Get(GroupKey, GroupData) then begin
+                    Clear(GroupData);
+                    GroupData.Add('groupKey', GroupKey);
+                    GroupData.Add('count', 0);
+                    GroupData.Add('sum', 0.0);
+                    GroupData.Add('min', 999999999.0);
+                    GroupData.Add('max', -999999999.0);
+                    Clear(EmptyArray);
+                    GroupData.Add('values', EmptyArray);
+
+                    // Add group field values
+                    AddGroupFieldValues(RecRef, GroupFieldNames, GroupData);
+
+                    GroupKeys.Add(GroupKey, GroupData);
+                end;
+
+                // Update aggregations
+                UpdateGroupAggregations(RecRef, QueryJson, GroupData);
+
+            until RecRef.Next() = 0;
+        end;
+
+        RecRef.Close();
+
+        // Calculate final aggregations (AVG)
+        FinalizeGroupAggregations(QueryJson, GroupKeys);
+
+        // Sort groups by aggregated value
+        SortField := GetSortField(QueryJson);
+        SortDir := GetSortDirection(QueryJson);
+        SortedGroups := SortGroupsByAggregation(GroupKeys, SortField, SortDir);
+
+        // Get top N limit
+        TopN := GetJsonInteger(QueryJson, 'top');
+        if TopN = 0 then
+            TopN := 10;
+
+        // Build result array
+        RecordCount := 0;
+        foreach GroupKey in SortedGroups do begin
+            if RecordCount >= TopN then
+                break;
+
+            GroupKeys.Get(GroupKey, GroupData);
+            ResultArray.Add(GroupData);
+            RecordCount += 1;
+        end;
+
+        ResultData.Add('groups', ResultArray);
+        ResultData.Add('count', RecordCount);
+
+        // Generate response text
+        ResponseText := GenerateGroupedResponseText(EntityName, QueryJson, ResultArray, RecordCount);
+
+        exit(true);
+    end;
+
+    local procedure ParseGroupByFields(QueryJson: JsonObject; var GroupFieldNames: List of [Text]): Boolean
+    var
+        GroupByToken: JsonToken;
+        GroupByArray: JsonArray;
+        FieldToken: JsonToken;
+        i: Integer;
+    begin
+        if not QueryJson.Get('groupBy', GroupByToken) then
+            exit(false);
+
+        if not GroupByToken.IsArray() then
+            exit(false);
+
+        GroupByArray := GroupByToken.AsArray();
+        if GroupByArray.Count() = 0 then
+            exit(false);
+
+        for i := 0 to GroupByArray.Count() - 1 do begin
+            GroupByArray.Get(i, FieldToken);
+            GroupFieldNames.Add(FieldToken.AsValue().AsText());
+        end;
+
+        exit(true);
+    end;
+
+    local procedure BuildGroupKey(RecRef: RecordRef; GroupFieldNames: List of [Text]): Text
+    var
+        FieldName: Text;
+        FieldNo: Integer;
+        FieldRef: FieldRef;
+        GroupKey: Text;
+    begin
+        GroupKey := '';
+        foreach FieldName in GroupFieldNames do begin
+            FieldNo := GetFieldNumber(RecRef, FieldName);
+            if FieldNo <> 0 then begin
+                FieldRef := RecRef.Field(FieldNo);
+                if GroupKey <> '' then
+                    GroupKey += '|';
+                GroupKey += Format(FieldRef.Value);
+            end;
+        end;
+        exit(GroupKey);
+    end;
+
+    local procedure AddGroupFieldValues(RecRef: RecordRef; GroupFieldNames: List of [Text]; var GroupData: JsonObject)
+    var
+        FieldName: Text;
+        FieldNo: Integer;
+        FieldRef: FieldRef;
+        FieldKey: Text;
+    begin
+        foreach FieldName in GroupFieldNames do begin
+            FieldNo := GetFieldNumber(RecRef, FieldName);
+            if FieldNo <> 0 then begin
+                FieldRef := RecRef.Field(FieldNo);
+                FieldKey := LowerCase(FieldName.Replace(' ', '').Replace('(', '').Replace(')', '').Replace('/', ''));
+                GroupData.Add(FieldKey, Format(FieldRef.Value));
             end;
         end;
     end;
+
+    local procedure UpdateGroupAggregations(RecRef: RecordRef; QueryJson: JsonObject; var GroupData: JsonObject)
+    var
+        AggToken: JsonToken;
+        AggArray: JsonArray;
+        AggObj: JsonObject;
+        AggFunction: Text;
+        AggField: Text;
+        FieldNo: Integer;
+        FieldRef: FieldRef;
+        FieldValue: Decimal;
+        CurrentCount: Integer;
+        CurrentSum: Decimal;
+        CurrentMin: Decimal;
+        CurrentMax: Decimal;
+        ValuesArray: JsonArray;
+        i: Integer;
+    begin
+        // Get current aggregation values
+        CurrentCount := GetJsonInteger(GroupData, 'count');
+        CurrentSum := GetJsonDecimal(GroupData, 'sum');
+        CurrentMin := GetJsonDecimal(GroupData, 'min');
+        CurrentMax := GetJsonDecimal(GroupData, 'max');
+        GroupData.Get('values', AggToken);
+        ValuesArray := AggToken.AsArray();
+
+        // Increment count
+        CurrentCount += 1;
+        GroupData.Replace('count', CurrentCount);
+
+        // Process each aggregation function
+        if QueryJson.Get('aggregations', AggToken) then begin
+            if AggToken.IsArray() then begin
+                AggArray := AggToken.AsArray();
+                for i := 0 to AggArray.Count() - 1 do begin
+                    AggArray.Get(i, AggToken);
+                    if AggToken.IsObject() then begin
+                        AggObj := AggToken.AsObject();
+                        AggFunction := GetJsonText(AggObj, 'function');
+                        AggField := GetJsonText(AggObj, 'field');
+
+                        // For COUNT, we already incremented above
+                        if AggFunction <> 'COUNT' then begin
+                            // Get field value
+                            if AggField <> '*' then begin
+                                FieldNo := GetFieldNumber(RecRef, AggField);
+                                if FieldNo <> 0 then begin
+                                    FieldRef := RecRef.Field(FieldNo);
+                                    if Evaluate(FieldValue, Format(FieldRef.Value)) then begin
+                                        // Update SUM
+                                        CurrentSum += FieldValue;
+                                        GroupData.Replace('sum', CurrentSum);
+
+                                        // Update MIN/MAX
+                                        if FieldValue < CurrentMin then begin
+                                            CurrentMin := FieldValue;
+                                            GroupData.Replace('min', CurrentMin);
+                                        end;
+                                        if FieldValue > CurrentMax then begin
+                                            CurrentMax := FieldValue;
+                                            GroupData.Replace('max', CurrentMax);
+                                        end;
+
+                                        // Store value for AVG calculation
+                                        ValuesArray.Add(FieldValue);
+                                    end;
+                                end;
+                            end;
+                        end;
+                    end;
+                end;
+                GroupData.Replace('values', ValuesArray);
+            end;
+        end;
+    end;
+
+    local procedure FinalizeGroupAggregations(QueryJson: JsonObject; var GroupKeys: Dictionary of [Text, JsonObject])
+    var
+        GroupKey: Text;
+        GroupData: JsonObject;
+        AggToken: JsonToken;
+        AggArray: JsonArray;
+        AggObj: JsonObject;
+        AggFunction: Text;
+        AggAlias: Text;
+        CurrentCount: Integer;
+        CurrentSum: Decimal;
+        CurrentMin: Decimal;
+        CurrentMax: Decimal;
+        AverageValue: Decimal;
+        i: Integer;
+    begin
+        // Calculate final values for each group
+        foreach GroupKey in GroupKeys.Keys() do begin
+            GroupKeys.Get(GroupKey, GroupData);
+
+            CurrentCount := GetJsonInteger(GroupData, 'count');
+            CurrentSum := GetJsonDecimal(GroupData, 'sum');
+            CurrentMin := GetJsonDecimal(GroupData, 'min');
+            CurrentMax := GetJsonDecimal(GroupData, 'max');
+
+            // Calculate average
+            if CurrentCount > 0 then
+                AverageValue := CurrentSum / CurrentCount
+            else
+                AverageValue := 0;
+
+            GroupData.Add('avg', AverageValue);
+
+            // Add aliased aggregation values
+            if QueryJson.Get('aggregations', AggToken) then begin
+                if AggToken.IsArray() then begin
+                    AggArray := AggToken.AsArray();
+                    for i := 0 to AggArray.Count() - 1 do begin
+                        AggArray.Get(i, AggToken);
+                        if AggToken.IsObject() then begin
+                            AggObj := AggToken.AsObject();
+                            AggFunction := GetJsonText(AggObj, 'function');
+                            AggAlias := GetJsonText(AggObj, 'alias');
+
+                            case AggFunction of
+                                'COUNT':
+                                    GroupData.Add(AggAlias, CurrentCount);
+                                'SUM':
+                                    GroupData.Add(AggAlias, CurrentSum);
+                                'AVG':
+                                    GroupData.Add(AggAlias, AverageValue);
+                                'MIN':
+                                    GroupData.Add(AggAlias, CurrentMin);
+                                'MAX':
+                                    GroupData.Add(AggAlias, CurrentMax);
+                            end;
+                        end;
+                    end;
+                end;
+            end;
+
+            GroupKeys.Set(GroupKey, GroupData);
+        end;
+    end;
+
+    local procedure SortGroupsByAggregation(GroupKeys: Dictionary of [Text, JsonObject]; SortField: Text; SortDir: Text): List of [Text]
+    var
+        SortedKeys: List of [Text];
+        GroupKey: Text;
+        GroupData: JsonObject;
+        SortValues: Dictionary of [Decimal, List of [Text]];
+        SortValue: Decimal;
+        KeyList: List of [Text];
+        SortedValueList: List of [Decimal];
+        Value: Decimal;
+        GroupKeyFromList: Text;
+    begin
+        // Extract sort values for each group
+        foreach GroupKey in GroupKeys.Keys() do begin
+            GroupKeys.Get(GroupKey, GroupData);
+
+            // Get the aggregated value to sort by
+            if SortField <> '' then
+                SortValue := GetJsonDecimal(GroupData, SortField)
+            else
+                SortValue := GetJsonInteger(GroupData, 'count'); // Default to count
+
+            // Group keys by sort value (handle ties)
+            if not SortValues.Get(SortValue, KeyList) then begin
+                Clear(KeyList);
+                SortValues.Add(SortValue, KeyList);
+            end;
+            KeyList.Add(GroupKey);
+            SortValues.Set(SortValue, KeyList);
+        end;
+
+        // Sort values
+        Clear(SortedValueList);
+        foreach Value in SortValues.Keys() do
+            SortedValueList.Add(Value);
+
+        // Simple bubble sort (good enough for small result sets)
+        BubbleSortDecimalList(SortedValueList, SortDir = 'DESC');
+
+        // Build final sorted key list
+        foreach Value in SortedValueList do begin
+            SortValues.Get(Value, KeyList);
+            foreach GroupKeyFromList in KeyList do
+                SortedKeys.Add(GroupKeyFromList);
+        end;
+
+        exit(SortedKeys);
+    end;
+
+    local procedure BubbleSortDecimalList(var ValueList: List of [Decimal]; Descending: Boolean)
+    var
+        i: Integer;
+        j: Integer;
+        Temp: Decimal;
+        Value1: Decimal;
+        Value2: Decimal;
+        Swapped: Boolean;
+    begin
+        if ValueList.Count() <= 1 then
+            exit;
+
+        for i := 0 to ValueList.Count() - 2 do begin
+            Swapped := false;
+            for j := 0 to ValueList.Count() - i - 2 do begin
+                ValueList.Get(j, Value1);
+                ValueList.Get(j + 1, Value2);
+
+                if Descending then begin
+                    if Value1 < Value2 then begin
+                        ValueList.Set(j, Value2);
+                        ValueList.Set(j + 1, Value1);
+                        Swapped := true;
+                    end;
+                end else begin
+                    if Value1 > Value2 then begin
+                        ValueList.Set(j, Value2);
+                        ValueList.Set(j + 1, Value1);
+                        Swapped := true;
+                    end;
+                end;
+            end;
+            if not Swapped then
+                exit;
+        end;
+    end;
+
+    local procedure GenerateGroupedResponseText(EntityName: Text; QueryJson: JsonObject; ResultArray: JsonArray; RecordCount: Integer): Text
+    var
+        ResponseText: Text;
+        GroupToken: JsonToken;
+        GroupObj: JsonObject;
+        AggToken: JsonToken;
+        AggArray: JsonArray;
+        AggObj: JsonObject;
+        AggAlias: Text;
+        AggValue: Text;
+        GroupKeyValue: Text;
+        TopN: Integer;
+        i: Integer;
+    begin
+        TopN := GetJsonInteger(QueryJson, 'top');
+
+        if RecordCount = 0 then
+            exit(StrSubstNo('No %1 records found.', EntityName));
+
+        // For single result (e.g., "which X has most Y"), show the winner
+        if (RecordCount = 1) and (TopN = 1) then begin
+            ResultArray.Get(0, GroupToken);
+            if GroupToken.IsObject() then begin
+                GroupObj := GroupToken.AsObject();
+
+                // Get group key value (first groupBy field)
+                GroupKeyValue := GetFirstGroupFieldValue(GroupObj, QueryJson);
+
+                // Get aggregation value
+                if QueryJson.Get('aggregations', AggToken) then begin
+                    if AggToken.IsArray() then begin
+                        AggArray := AggToken.AsArray();
+                        if AggArray.Count() > 0 then begin
+                            AggArray.Get(0, AggToken);
+                            if AggToken.IsObject() then begin
+                                AggObj := AggToken.AsObject();
+                                AggAlias := GetJsonText(AggObj, 'alias');
+                                AggValue := Format(GetJsonDecimal(GroupObj, AggAlias));
+
+                                ResponseText := StrSubstNo('%1 has %2.', GroupKeyValue, AggValue);
+                                exit(ResponseText);
+                            end;
+                        end;
+                    end;
+                end;
+            end;
+        end;
+
+        // For multiple results, list them
+        ResponseText := StrSubstNo('Found %1 groups:', RecordCount);
+        for i := 0 to RecordCount - 1 do begin
+            ResultArray.Get(i, GroupToken);
+            if GroupToken.IsObject() then begin
+                GroupObj := GroupToken.AsObject();
+                GroupKeyValue := GetFirstGroupFieldValue(GroupObj, QueryJson);
+
+                // Get aggregation value
+                if QueryJson.Get('aggregations', AggToken) then begin
+                    if AggToken.IsArray() then begin
+                        AggArray := AggToken.AsArray();
+                        if AggArray.Count() > 0 then begin
+                            AggArray.Get(0, AggToken);
+                            if AggToken.IsObject() then begin
+                                AggObj := AggToken.AsObject();
+                                AggAlias := GetJsonText(AggObj, 'alias');
+                                AggValue := Format(GetJsonDecimal(GroupObj, AggAlias));
+
+                                ResponseText += StrSubstNo(' %1 (%2)', GroupKeyValue, AggValue);
+                                if i < RecordCount - 1 then
+                                    ResponseText += ',';
+                            end;
+                        end;
+                    end;
+                end;
+            end;
+        end;
+
+        exit(ResponseText);
+    end;
+
+    local procedure GetFirstGroupFieldValue(GroupObj: JsonObject; QueryJson: JsonObject): Text
+    var
+        GroupByToken: JsonToken;
+        GroupByArray: JsonArray;
+        FieldToken: JsonToken;
+        FieldName: Text;
+        FieldKey: Text;
+    begin
+        if QueryJson.Get('groupBy', GroupByToken) then begin
+            if GroupByToken.IsArray() then begin
+                GroupByArray := GroupByToken.AsArray();
+                if GroupByArray.Count() > 0 then begin
+                    GroupByArray.Get(0, FieldToken);
+                    FieldName := FieldToken.AsValue().AsText();
+                    FieldKey := LowerCase(FieldName.Replace(' ', '').Replace('(', '').Replace(')', '').Replace('/', ''));
+                    exit(GetJsonText(GroupObj, FieldKey));
+                end;
+            end;
+        end;
+        exit('Unknown');
+    end;
+
+    local procedure GetJsonDecimal(JObject: JsonObject; PropertyName: Text): Decimal
+    var
+        JToken: JsonToken;
+        DecValue: Decimal;
+    begin
+        if JObject.Get(PropertyName, JToken) then
+            if JToken.IsValue() then
+                if Evaluate(DecValue, JToken.AsValue().AsText()) then
+                    exit(DecValue);
+        exit(0);
+    end;
+
+    local procedure GenerateResponseText(EntityName: Text; RecordCount: Integer; TopN: Integer; ResultArray: JsonArray; QueryJson: JsonObject): Text
+    var
+        ResponseText: Text;
+        SortField: Text;
+        SortDir: Text;
+        FirstRecord: JsonToken;
+        FirstObj: JsonObject;
+        KeyValue: Text;
+        NameValue: Text;
+        AmountValue: Text;
+        DateValue: Text;
+    begin
+        if RecordCount = 0 then
+            exit(StrSubstNo('No %1 records found.', EntityName));
+
+        SortField := GetSortField(QueryJson);
+        SortDir := GetSortDirection(QueryJson);
+
+        // For single record queries (top:1), provide detailed info
+        if (RecordCount = 1) and (TopN = 1) then begin
+            ResultArray.Get(0, FirstRecord);
+            if FirstRecord.IsObject() then begin
+                FirstObj := FirstRecord.AsObject();
+
+                // Extract key fields
+                KeyValue := GetJsonValueFromRecord(FirstObj, 'no');
+                NameValue := GetJsonValueFromRecord(FirstObj, 'name');
+                if NameValue = '' then
+                    NameValue := GetJsonValueFromRecord(FirstObj, 'description');
+                AmountValue := GetJsonValueFromRecord(FirstObj, 'amount');
+                if AmountValue = '' then
+                    AmountValue := GetJsonValueFromRecord(FirstObj, 'saleslcy');
+                DateValue := GetJsonValueFromRecord(FirstObj, 'orderdate');
+                if DateValue = '' then
+                    DateValue := GetJsonValueFromRecord(FirstObj, 'postingdate');
+
+                // Format response based on entity type and sort
+                case EntityName of
+                    'SalesOrder', 'Sales Order', 'SalesHeader', 'Sales Header':
+                        begin
+                            if (SortField = 'Amount') and (SortDir = 'DESC') then
+                                ResponseText := StrSubstNo('Largest sales order is %1 for %2.', KeyValue, AmountValue)
+                            else if (SortField = 'Order Date') and (SortDir = 'DESC') then
+                                ResponseText := StrSubstNo('Latest sales order is %1 on %2 for %3.', KeyValue, DateValue, AmountValue)
+                            else
+                                ResponseText := StrSubstNo('Sales order: %1', KeyValue);
+                        end;
+                    'Customer':
+                        begin
+                            if (SortField = 'Sales (LCY)') and (SortDir = 'DESC') then
+                                ResponseText := StrSubstNo('Top customer is %1 (%2).', NameValue, KeyValue)
+                            else if (SortField = 'Balance (LCY)') and (SortDir = 'DESC') then
+                                ResponseText := StrSubstNo('Customer with highest balance is %1 (%2).', NameValue, KeyValue)
+                            else
+                                ResponseText := StrSubstNo('Customer: %1 (%2)', NameValue, KeyValue);
+                        end;
+                    'Item':
+                        begin
+                            if (SortField = 'Sales (LCY)') and (SortDir = 'DESC') then
+                                ResponseText := StrSubstNo('Top selling item is %1 - %2.', KeyValue, NameValue)
+                            else if (SortField = 'Inventory') and (SortDir = 'DESC') then
+                                ResponseText := StrSubstNo('Item with most inventory is %1 - %2.', KeyValue, NameValue)
+                            else
+                                ResponseText := StrSubstNo('Item: %1 - %2', KeyValue, NameValue);
+                        end;
+                    'G/L Entry', 'GLEntry':
+                        ResponseText := StrSubstNo('G/L Entry %1: %2', KeyValue, NameValue);
+                    else
+                        ResponseText := StrSubstNo('%1: %2', EntityName, KeyValue);
+                end;
+            end else
+                ResponseText := StrSubstNo('Found 1 %1 record.', EntityName);
+        end
+        // For multiple records, provide list or summary
+        else begin
+            // For small result sets (≤10), list them
+            if RecordCount <= 10 then
+                ResponseText := BuildRecordList(EntityName, RecordCount, ResultArray)
+            else if (TopN <= 10) and (SortDir = 'DESC') then
+                ResponseText := StrSubstNo('Top %1 %2 records by %3.', RecordCount, EntityName, SortField)
+            else
+                ResponseText := StrSubstNo('Found %1 %2 record(s).', RecordCount, EntityName);
+        end;
+
+        exit(ResponseText);
+    end;
+
+    local procedure BuildRecordList(EntityName: Text; RecordCount: Integer; ResultArray: JsonArray): Text
+    var
+        ResponseText: Text;
+        RecordToken: JsonToken;
+        RecordObj: JsonObject;
+        KeyValue: Text;
+        NameValue: Text;
+        i: Integer;
+    begin
+        ResponseText := StrSubstNo('Found %1 %2:', RecordCount, EntityName);
+        
+        for i := 0 to RecordCount - 1 do begin
+            if ResultArray.Get(i, RecordToken) then begin
+                if RecordToken.IsObject() then begin
+                    RecordObj := RecordToken.AsObject();
+                    KeyValue := GetJsonValueFromRecord(RecordObj, 'no');
+                    NameValue := GetJsonValueFromRecord(RecordObj, 'name');
+                    if NameValue = '' then
+                        NameValue := GetJsonValueFromRecord(RecordObj, 'description');
+                    
+                    if NameValue <> '' then
+                        ResponseText += StrSubstNo('\n- %1 (%2)', NameValue, KeyValue)
+                    else
+                        ResponseText += StrSubstNo('\n- %1', KeyValue);
+                end;
+            end;
+        end;
+        
+        exit(ResponseText);
+    end;
+
+    local procedure GetJsonValueFromRecord(RecordObj: JsonObject; FieldName: Text): Text
+    var
+        FieldToken: JsonToken;
+    begin
+        if RecordObj.Get(FieldName, FieldToken) then
+            exit(FieldToken.AsValue().AsText());
+        exit('');
+    end;
+
+    local procedure ApplyGenericFilters(QueryJson: JsonObject; var RecRef: RecordRef)
+    var
+        FiltersToken: JsonToken;
+        FiltersArray: JsonArray;
+        FilterToken: JsonToken;
+        FilterObj: JsonObject;
+        FieldName: Text;
+        FieldValue: Text;
+        FieldRef: FieldRef;
+        FieldNo: Integer;
+        i: Integer;
+    begin
+        if not QueryJson.Get('filters', FiltersToken) then
+            exit;
+
+        if not FiltersToken.IsArray() then
+            exit;
+
+        FiltersArray := FiltersToken.AsArray();
+        for i := 0 to FiltersArray.Count() - 1 do begin
+            FiltersArray.Get(i, FilterToken);
+            if FilterToken.IsObject() then begin
+                FilterObj := FilterToken.AsObject();
+                FieldName := GetJsonText(FilterObj, 'field');
+                FieldValue := GetJsonText(FilterObj, 'value');
+
+                if FieldName <> '' then begin
+                    FieldNo := GetFieldNumber(RecRef, FieldName);
+                    if FieldNo <> 0 then begin
+                        FieldRef := RecRef.Field(FieldNo);
+                        FieldRef.SetFilter(FieldValue);
+                    end;
+                end;
+            end;
+        end;
+    end;
+
+    local procedure ApplyGenericSorting(QueryJson: JsonObject; var RecRef: RecordRef; EntityName: Text)
+    var
+        SortField: Text;
+        SortDir: Text;
+        FieldNo: Integer;
+        FieldRef: FieldRef;
+    begin
+        SortField := GetSortField(QueryJson);
+        SortDir := GetSortDirection(QueryJson);
+
+        // Apply entity-specific default sorting if none specified
+        if SortField = '' then
+            SortField := GetDefaultSortField(EntityName);
+
+        if SortField <> '' then begin
+            FieldNo := GetFieldNumber(RecRef, SortField);
+            if FieldNo <> 0 then begin
+                FieldRef := RecRef.Field(FieldNo);
+                
+                // Only apply SetView for Normal fields, not FlowFields
+                // FlowFields can't be used in SETCURRENTKEY/ORDER
+                if FieldRef.Class() = FieldClass::Normal then
+                    RecRef.SetView(StrSubstNo('SORTING(%1) ORDER(%2)', FieldRef.Name, UpperCase(SortDir)));
+                // For FlowFields, sorting will happen after data retrieval
+            end;
+        end;
+    end;
+
+    local procedure GetDefaultSortField(EntityName: Text): Text
+    begin
+        case EntityName of
+            'Customer':
+                exit('Sales (LCY)');
+            'Vendor':
+                exit('Balance (LCY)');
+            'Item':
+                exit('Inventory');
+            'SalesOrder', 'Sales Order':
+                exit('Order Date');
+            'SalesInvoice', 'Sales Invoice':
+                exit('Posting Date');
+            'PurchaseOrder', 'Purchase Order':
+                exit('Order Date');
+            else
+                exit('');
+        end;
+    end;
+
+    local procedure GetFieldNumber(RecRef: RecordRef; FieldName: Text): Integer
+    var
+        FieldRef: FieldRef;
+        i: Integer;
+    begin
+        // Try exact match first
+        for i := 1 to RecRef.FieldCount() do begin
+            FieldRef := RecRef.FieldIndex(i);
+            if FieldRef.Name = FieldName then
+                exit(FieldRef.Number);
+        end;
+
+        // Try case-insensitive match
+        for i := 1 to RecRef.FieldCount() do begin
+            FieldRef := RecRef.FieldIndex(i);
+            if LowerCase(FieldRef.Name) = LowerCase(FieldName) then
+                exit(FieldRef.Number);
+        end;
+
+        exit(0);
+    end;
+
+    local procedure BuildRecordJson(RecRef: RecordRef; EntityName: Text; var RecordJson: JsonObject)
+    var
+        FieldRef: FieldRef;
+        i: Integer;
+        FieldClass: FieldClass;
+    begin
+        // Add all normal and flow fields (skip FlowFilters and BLOB fields)
+        for i := 1 to RecRef.FieldCount() do begin
+            FieldRef := RecRef.FieldIndex(i);
+            FieldClass := FieldRef.Class();
+            
+            // Include Normal and FlowField, skip FlowFilter and BLOB
+            if FieldClass in [FieldClass::Normal, FieldClass::FlowField] then begin
+                if FieldRef.Type() <> FieldType::BLOB then begin
+                    // Calculate FlowFields before reading
+                    if FieldClass = FieldClass::FlowField then
+                        FieldRef.CalcField();
+                    AddFieldToJson(FieldRef, RecordJson);
+                end;
+            end;
+        end;
+    end;
+
+    local procedure AddFieldToJson(FieldRef: FieldRef; var RecordJson: JsonObject)
+    var
+        FieldName: Text;
+        FieldValue: Text;
+    begin
+        FieldName := LowerCase(FieldRef.Name.Replace(' ', '').Replace('(', '').Replace(')', '').Replace('/', '').Replace('.', ''));
+        FieldValue := Format(FieldRef.Value);
+        RecordJson.Add(FieldName, FieldValue);
+    end;
+
+    local procedure AddCustomerFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'Name', RecordJson);
+        AddFieldIfExists(RecRef, 'City', RecordJson);
+        AddFieldIfExists(RecRef, 'Balance (LCY)', RecordJson);
+        AddFieldIfExists(RecRef, 'Sales (LCY)', RecordJson);
+    end;
+
+    local procedure AddVendorFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'Name', RecordJson);
+        AddFieldIfExists(RecRef, 'City', RecordJson);
+        AddFieldIfExists(RecRef, 'Balance (LCY)', RecordJson);
+    end;
+
+    local procedure AddItemFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'Description', RecordJson);
+        AddFieldIfExists(RecRef, 'Type', RecordJson);
+        AddFieldIfExists(RecRef, 'Inventory', RecordJson);
+        AddFieldIfExists(RecRef, 'Unit Price', RecordJson);
+        AddFieldIfExists(RecRef, 'Unit Cost', RecordJson);
+        AddFieldIfExists(RecRef, 'Sales (LCY)', RecordJson);
+    end;
+
+    local procedure AddEmployeeFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'First Name', RecordJson);
+        AddFieldIfExists(RecRef, 'Last Name', RecordJson);
+        AddFieldIfExists(RecRef, 'Job Title', RecordJson);
+        AddFieldIfExists(RecRef, 'Company E-Mail', RecordJson);
+    end;
+
+    local procedure AddSalesOrderFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'Order Date', RecordJson);
+        AddFieldIfExists(RecRef, 'Sell-to Customer Name', RecordJson);
+        AddFieldIfExists(RecRef, 'Amount', RecordJson);
+    end;
+
+    local procedure AddSalesInvoiceFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'Posting Date', RecordJson);
+        AddFieldIfExists(RecRef, 'Sell-to Customer Name', RecordJson);
+        AddFieldIfExists(RecRef, 'Amount Including VAT', RecordJson);
+    end;
+
+    local procedure AddLocationFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'Name', RecordJson);
+        AddFieldIfExists(RecRef, 'City', RecordJson);
+        AddFieldIfExists(RecRef, 'Contact', RecordJson);
+    end;
+
+    local procedure AddPurchaseOrderFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'Order Date', RecordJson);
+        AddFieldIfExists(RecRef, 'Buy-from Vendor Name', RecordJson);
+        AddFieldIfExists(RecRef, 'Amount', RecordJson);
+    end;
+
+    local procedure AddPurchaseLineFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'Document Type', RecordJson);
+        AddFieldIfExists(RecRef, 'Document No.', RecordJson);
+        AddFieldIfExists(RecRef, 'Line No.', RecordJson);
+        AddFieldIfExists(RecRef, 'Type', RecordJson);
+        AddFieldIfExists(RecRef, 'No.', RecordJson);
+        AddFieldIfExists(RecRef, 'Description', RecordJson);
+        AddFieldIfExists(RecRef, 'Quantity', RecordJson);
+        AddFieldIfExists(RecRef, 'Direct Unit Cost', RecordJson);
+        AddFieldIfExists(RecRef, 'Amount', RecordJson);
+    end;
+
+    local procedure AddSalesLineFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'Document Type', RecordJson);
+        AddFieldIfExists(RecRef, 'Document No.', RecordJson);
+        AddFieldIfExists(RecRef, 'Line No.', RecordJson);
+        AddFieldIfExists(RecRef, 'Type', RecordJson);
+        AddFieldIfExists(RecRef, 'No.', RecordJson);
+        AddFieldIfExists(RecRef, 'Description', RecordJson);
+        AddFieldIfExists(RecRef, 'Quantity', RecordJson);
+        AddFieldIfExists(RecRef, 'Unit Price', RecordJson);
+        AddFieldIfExists(RecRef, 'Amount', RecordJson);
+    end;
+
+    local procedure AddGLEntryFields(RecRef: RecordRef; var RecordJson: JsonObject)
+    begin
+        AddFieldIfExists(RecRef, 'G/L Account No.', RecordJson);
+        AddFieldIfExists(RecRef, 'Posting Date', RecordJson);
+        AddFieldIfExists(RecRef, 'Document No.', RecordJson);
+        AddFieldIfExists(RecRef, 'Description', RecordJson);
+        AddFieldIfExists(RecRef, 'Amount', RecordJson);
+        AddFieldIfExists(RecRef, 'Debit Amount', RecordJson);
+        AddFieldIfExists(RecRef, 'Credit Amount', RecordJson);
+        AddFieldIfExists(RecRef, 'Journal Batch Name', RecordJson);
+    end;
+
+    local procedure AddFieldIfExists(RecRef: RecordRef; FieldName: Text; var RecordJson: JsonObject)
+    var
+        FieldNo: Integer;
+    begin
+        FieldNo := GetFieldNumber(RecRef, FieldName);
+        if FieldNo <> 0 then
+            AddFieldToJson(RecRef.Field(FieldNo), RecordJson);
+    end;
+
+    // LEGACY: Keep old functions for now in case needed for reference, but they're no longer called
 
     local procedure QueryCustomers(QueryJson: JsonObject; var ResultData: JsonObject; var RecordCount: Integer; var ResponseText: Text): Boolean
     var
@@ -498,6 +1477,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         TotalSales: Decimal;
         DebugJson: Text;
         DebugInfo: Text;
+        QueryType: Text;
         Setup: Record "NXR Voice Assistant Setup";
     begin
         // DEBUG: Capture what JSON we received (if debug mode enabled)
@@ -507,6 +1487,17 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         end;
 
         ApplyFiltersFromJson(QueryJson, Customer);
+
+        // Check if this is a count-only query
+        QueryType := GetJsonText(QueryJson, 'queryType');
+        if QueryType = 'count' then begin
+            RecordCount := Customer.Count();
+            ResultData.Add('count', RecordCount);
+            if Setup.Get() and Setup."Debug Mode" then
+                ResponseText := DebugInfo + '\\\\Count query detected\\';
+            ResponseText += StrSubstNo('\\There are %1 customers in the database.', RecordCount);
+            exit(true);
+        end;
 
         // Handle sorting
         SortField := GetSortField(QueryJson);
@@ -554,8 +1545,6 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if RecordCount > TopN then
-                break;
 
             Clear(CustomerJson);
             CustomerJson.Add('no', Customer."No.");
@@ -567,6 +1556,10 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             TotalBalance += Customer."Balance (LCY)";
             TotalSales += Customer."Sales (LCY)";
             ResultArray.Add(CustomerJson);
+
+            // Stop if we've reached the limit
+            if RecordCount >= TopN then
+                break;
         until Customer.Next() = 0;
 
         ResultData.Add('customers', ResultArray);
@@ -654,7 +1647,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if RecordCount > TopN then
+            if RecordCount >= TopN then
                 break;
 
             Clear(ItemJson);
@@ -727,8 +1720,6 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if RecordCount > TopN then
-                break;
 
             Clear(VendorJson);
             VendorJson.Add('no', Vendor."No.");
@@ -738,6 +1729,9 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             VendorJson.Add('balance', Vendor."Balance (LCY)");
             TotalOwed += Vendor."Balance (LCY)";
             ResultArray.Add(VendorJson);
+
+            if RecordCount >= TopN then
+                break;
         until Vendor.Next() = 0;
 
         ResultData.Add('vendors', ResultArray);
@@ -763,6 +1757,11 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         EndDate: Date;
         TotalAmount: Decimal;
         DateFilterValue: Text;
+        SortField: Text;
+        SortDir: Text;
+        FirstOrderNo: Code[20];
+        FirstOrderDate: Date;
+        FirstOrderAmount: Decimal;
     begin
         SalesHeader.SetRange("Document Type", SalesHeader."Document Type"::Order);
 
@@ -772,6 +1771,15 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             GetDateRangeFromText(DateFilterValue, StartDate, EndDate);
             if StartDate <> 0D then
                 SalesHeader.SetRange("Order Date", StartDate, EndDate);
+        end;
+
+        // Handle sorting (e.g., last sales order)
+        SortField := GetSortField(QueryJson);
+        SortDir := GetSortDirection(QueryJson);
+        // Normalize field name to handle variations (Order_Date, Order Date, orderdate, orderDate)
+        if (SortField = 'Order_Date') or (SortField = 'Order Date') or (SortField = 'orderdate') or (SortField = 'orderDate') then begin
+            SalesHeader.SetCurrentKey("Order Date");
+            SalesHeader.Ascending(SortDir <> 'DESC');
         end;
 
         TopN := GetJsonInteger(QueryJson, 'top');
@@ -790,8 +1798,6 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if RecordCount > TopN then
-                break;
 
             Clear(OrderJson);
             OrderJson.Add('no', SalesHeader."No.");
@@ -800,13 +1806,26 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             SalesHeader.CalcFields(Amount);
             OrderJson.Add('amount', SalesHeader.Amount);
             TotalAmount += SalesHeader.Amount;
+            if RecordCount = 1 then begin
+                FirstOrderNo := SalesHeader."No.";
+                FirstOrderDate := SalesHeader."Order Date";
+                FirstOrderAmount := SalesHeader.Amount;
+            end;
             ResultArray.Add(OrderJson);
+
+            // Stop if we've reached the limit
+            if RecordCount >= TopN then
+                break;
         until SalesHeader.Next() = 0;
 
         ResultData.Add('orders', ResultArray);
         ResultData.Add('totalAmount', TotalAmount);
 
-        if DateFilterValue <> '' then
+        // Check for "last order" query pattern - handle all field name variations
+        if (RecordCount = 1) and (TopN = 1) and (DateFilterValue = '') and
+           ((SortField = 'Order_Date') or (SortField = 'Order Date') or (SortField = 'orderdate') or (SortField = 'orderDate')) and (SortDir = 'DESC') then
+            ResponseText := StrSubstNo('Latest sales order is %1 on %2 for %3.', FirstOrderNo, Format(FirstOrderDate), Format(FirstOrderAmount, 0, '<Precision,2:2><Standard Format,0>'))
+        else if DateFilterValue <> '' then
             ResponseText := StrSubstNo('Found %1 orders for %2 totalling %3.', RecordCount, DateFilterValue, Format(TotalAmount, 0, '<Precision,2:2><Standard Format,0>'))
         else
             ResponseText := StrSubstNo('Found %1 open orders totalling %2.', RecordCount, Format(TotalAmount, 0, '<Precision,2:2><Standard Format,0>'));
@@ -848,8 +1867,6 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if RecordCount > TopN then
-                break;
 
             Clear(InvoiceJson);
             InvoiceJson.Add('no', SalesInvoiceHeader."No.");
@@ -859,6 +1876,9 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             InvoiceJson.Add('amount', SalesInvoiceHeader."Amount Including VAT");
             TotalAmount += SalesInvoiceHeader."Amount Including VAT";
             ResultArray.Add(InvoiceJson);
+
+            if RecordCount >= TopN then
+                break;
         until SalesInvoiceHeader.Next() = 0;
 
         ResultData.Add('invoices', ResultArray);
@@ -914,7 +1934,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if RecordCount > TopN then
+            if RecordCount >= TopN then
                 break;
 
             Clear(EmployeeJson);
@@ -977,7 +1997,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if RecordCount > TopN then
+            if RecordCount >= TopN then
                 break;
 
             Clear(LocationJson);
@@ -1034,8 +2054,6 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         RecordCount := 0;
         repeat
             RecordCount += 1;
-            if RecordCount > TopN then
-                break;
 
             Clear(OrderJson);
             OrderJson.Add('no', PurchaseHeader."No.");
@@ -1045,6 +2063,9 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             OrderJson.Add('amount', PurchaseHeader.Amount);
             TotalAmount += PurchaseHeader.Amount;
             ResultArray.Add(OrderJson);
+
+            if RecordCount >= TopN then
+                break;
         until PurchaseHeader.Next() = 0;
 
         ResultData.Add('purchaseOrders', ResultArray);
@@ -1639,5 +2660,117 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         if A < B then
             exit(A);
         exit(B);
+    end;
+
+    local procedure SortResultArrayIfNeeded(var ResultArray: JsonArray; QueryJson: JsonObject; TableNo: Integer)
+    var
+        SortField: Text;
+        SortDir: Text;
+        IsFlowField: Boolean;
+    begin
+        SortField := GetSortField(QueryJson);
+        if SortField = '' then
+            exit; // No sorting needed
+
+        // Try to check if sort field is a FlowField
+        if not TryCheckIfFlowField(TableNo, SortField, IsFlowField) then
+            exit; // Can't determine field type, skip post-sort
+        
+        if not IsFlowField then
+            exit; // Normal field, already sorted by SetView
+
+        // FlowField detected - need to sort the JSON array
+        SortDir := GetSortDirection(QueryJson);
+        SortJsonArrayByField(ResultArray, SortField, SortDir);
+    end;
+
+    [TryFunction]
+    local procedure TryCheckIfFlowField(TableNo: Integer; FieldName: Text; var IsFlowField: Boolean)
+    var
+        TempRecRef: RecordRef;
+        FieldRef: FieldRef;
+        FieldNo: Integer;
+    begin
+        IsFlowField := false;
+        TempRecRef.Open(TableNo);
+        FieldNo := GetFieldNumber(TempRecRef, FieldName);
+        if FieldNo = 0 then begin
+            TempRecRef.Close();
+            Error('');  // Trigger try function to return false
+        end;
+
+        FieldRef := TempRecRef.Field(FieldNo);
+        IsFlowField := (FieldRef.Class() = FieldClass::FlowField);
+        TempRecRef.Close();
+    end;
+
+    local procedure SortJsonArrayByField(var ResultArray: JsonArray; SortField: Text; Direction: Text)
+    var
+        SortedArray: JsonArray;
+        ValueList: List of [Decimal];
+        RecordList: List of [JsonObject];
+        Token: JsonToken;
+        RecordObj: JsonObject;
+        FieldValue: Decimal;
+        i: Integer;
+        j: Integer;
+        MinIdx: Integer;
+        MinValue: Decimal;
+        TempValue: Decimal;
+        TempRecord: JsonObject;
+        FieldName: Text;
+    begin
+        if ResultArray.Count() = 0 then
+            exit;
+
+        // Convert field name to lowercase without spaces/special chars
+        FieldName := LowerCase(SortField.Replace(' ', '').Replace('(', '').Replace(')', '').Replace('/', '').Replace('.', ''));
+
+        // Extract values and records into lists
+        foreach Token in ResultArray do begin
+            if Token.IsObject() then begin
+                RecordObj := Token.AsObject();
+                RecordList.Add(RecordObj);
+                
+                // Try to get numeric value for sorting
+                if not Evaluate(FieldValue, GetJsonText(RecordObj, FieldName)) then
+                    FieldValue := 0;
+                ValueList.Add(FieldValue);
+            end;
+        end;
+
+        // Simple selection sort
+        for i := 1 to ValueList.Count() - 1 do begin
+            MinIdx := i;
+            MinValue := ValueList.Get(i);
+            
+            for j := i + 1 to ValueList.Count() do begin
+                TempValue := ValueList.Get(j);
+                if ((Direction = 'DESC') and (TempValue > MinValue)) or
+                   ((Direction <> 'DESC') and (TempValue < MinValue)) then begin
+                    MinIdx := j;
+                    MinValue := TempValue;
+                end;
+            end;
+            
+            if MinIdx <> i then begin
+                // Swap in value list
+                TempValue := ValueList.Get(i);
+                ValueList.Set(i, ValueList.Get(MinIdx));
+                ValueList.Set(MinIdx, TempValue);
+                
+                // Swap in record list
+                TempRecord := RecordList.Get(i);
+                RecordList.Set(i, RecordList.Get(MinIdx));
+                RecordList.Set(MinIdx, TempRecord);
+            end;
+        end;
+
+        // Rebuild array in sorted order
+        Clear(SortedArray);
+        foreach RecordObj in RecordList do
+            SortedArray.Add(RecordObj);
+        
+        ResultArray := SortedArray;
     end;
 }

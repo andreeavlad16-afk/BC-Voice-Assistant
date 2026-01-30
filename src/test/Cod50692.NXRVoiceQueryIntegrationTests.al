@@ -263,6 +263,92 @@ codeunit 50692 "NXR Voice Query Integ. Tests"
             Error('Response should mention orders: %1', Response);
     end;
 
+    [Test]
+    procedure TestQuery_LastSalesOrderNumber()
+    var
+        QueryText: Text;
+        Response: Text;
+    begin
+        // [SCENARIO] User asks for the last sales order number
+        Initialize();
+
+        // [GIVEN] Query: "What is the last sales order number"
+        QueryText := 'What is the last sales order number';
+
+        // [WHEN] Processing the query
+        Response := AssistantMgt.ProcessQuery(QueryText, '', '');
+
+        // [THEN] Response should focus on a single sales order, not totals
+        LogTestResult('Last Sales Order Number', QueryText, Response);
+        if (StrPos(LowerCase(Response), 'order') = 0) then
+            Error('Response should mention order: %1', Response);
+        if (StrPos(LowerCase(Response), 'open orders totalling') > 0) then
+            Error('Response should not return open order totals: %1', Response);
+    end;
+
+    [Test]
+    procedure TestQuery_BiggestSalesOrder()
+    var
+        QueryText: Text;
+        Response: Text;
+    begin
+        // [SCENARIO] User asks for the biggest sales order
+        Initialize();
+
+        // [GIVEN] Query: "What is the biggest sales order"
+        QueryText := 'What is the biggest sales order';
+
+        // [WHEN] Processing the query
+        Response := AssistantMgt.ProcessQuery(QueryText, '', '');
+
+        // [THEN] Response should mention sales order
+        LogTestResult('Biggest Sales Order', QueryText, Response);
+        if (StrPos(LowerCase(Response), 'order') = 0) then
+            Error('Response should mention order: %1', Response);
+    end;
+
+    [Test]
+    procedure TestQuery_LatestInvoice()
+    var
+        QueryText: Text;
+        Response: Text;
+    begin
+        // [SCENARIO] User asks for the latest invoice
+        Initialize();
+
+        // [GIVEN] Query: "Latest invoice"
+        QueryText := 'Latest invoice';
+
+        // [WHEN] Processing the query
+        Response := AssistantMgt.ProcessQuery(QueryText, '', '');
+
+        // [THEN] Response should mention invoice
+        LogTestResult('Latest Invoice', QueryText, Response);
+        if (StrPos(LowerCase(Response), 'invoice') = 0) then
+            Error('Response should mention invoice: %1', Response);
+    end;
+
+    [Test]
+    procedure TestQuery_LocationCount()
+    var
+        QueryText: Text;
+        Response: Text;
+    begin
+        // [SCENARIO] User asks how many locations exist
+        Initialize();
+
+        // [GIVEN] Query: "How many locations do we have"
+        QueryText := 'How many locations do we have';
+
+        // [WHEN] Processing the query
+        Response := AssistantMgt.ProcessQuery(QueryText, '', '');
+
+        // [THEN] Response should mention locations
+        LogTestResult('Count Locations', QueryText, Response);
+        if (StrPos(LowerCase(Response), 'location') = 0) then
+            Error('Response should mention locations: %1', Response);
+    end;
+
     // ============================================================================
     // COMPLEX/ODATA QUERIES
     // ============================================================================

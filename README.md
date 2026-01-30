@@ -37,12 +37,16 @@ A complete voice-activated assistant system consisting of:
 
 - ✅ **Voice Input**: "Show me today's sales orders"
 - ✅ **Voice Output**: Hear responses read aloud
+- ✅ **Conversation History** (v2.1.9.0): AI remembers last 5 exchanges for contextual understanding
+- ✅ **AI-Generated Follow-Ups** (v2.1.9.0): Contextual question suggestions after each query
 - ✅ **BC-Native Mode**: Works without Azure (pattern matching)
 - ✅ **AI-Enhanced Mode**: Uses Azure OpenAI for complex queries
 - ✅ **Mobile Ready**: Custom control add-in for BC Mobile App
 - ✅ **OData Discovery**: Dynamically discovers available entities
 - ✅ **Real-time Updates**: Azure SignalR for live communication
 - ✅ **Production Ready**: Complete monitoring and error handling
+- ✅ **Dynamic Field Selection**: Metadata-driven query execution (no hardcoding)
+- ✅ **FlowField Support**: Automatic calculation of computed fields
 
 ---
 

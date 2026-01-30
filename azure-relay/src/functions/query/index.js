@@ -5,14 +5,15 @@
 
 const fetch = require('node-fetch');
 
-async function callBCVoiceAPI(queryText, accessToken) {
-    const apiUrl = `${process.env.BC_ENVIRONMENT_URL}/api/hackathon/voiceAssistant/v1.0/voiceCommands`;
+async function callBCVoiceAPI(queryText, functionKey) {
+    // Use BC Function App endpoint with function key authentication
+    // This is service-to-service, not user authentication
+    const apiUrl = `${process.env.BC_ENVIRONMENT_URL}/api/hackathon/voiceAssistant/v1.0/voiceCommands?code=${functionKey}`;
     
     const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify({
             queryText: queryText
@@ -40,13 +41,28 @@ module.exports = async function (context, req) {
             return;
         }
         
-        // For now, return a placeholder
-        // In production, you'd need proper BC authentication here
+        // Try to call BC API if endpoint is configured
+        if (process.env.BC_ENVIRONMENT_URL && process.env.BC_FUNCTION_KEY) {
+            try {
+                const result = await callBCVoiceAPI(queryText, process.env.BC_FUNCTION_KEY);
+                context.res = {
+                    status: 200,
+                    jsonBody: result
+                };
+                return;
+            } catch (bcError) {
+                context.log(`⚠️ BC API call failed: ${bcError.message}`);
+                // Fall through to simple response
+            }
+        }
+
+        // Fallback: return simple response
         context.res = {
             status: 200,
             jsonBody: { 
-                status: 'Query endpoint ready',
-                received: queryText
+                status: 'Query received',
+                query: queryText,
+                message: 'BC API not configured. Configure BC_ENVIRONMENT_URL and BC_FUNCTION_KEY.'
             }
         };
         

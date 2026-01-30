@@ -23,6 +23,24 @@ module.exports = async function (context, req) {
             return;
         }
 
+        // Check if Whisper is configured
+        const useAzureOpenAI = process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_KEY && process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT;
+        const useOpenAI = process.env.OPENAI_API_KEY;
+
+        if (!useAzureOpenAI && !useOpenAI) {
+            context.log('❌ No Whisper API configured');
+            context.res = {
+                status: 500,
+                jsonBody: { 
+                    error: 'Whisper transcription not configured',
+                    details: 'Missing AZURE_OPENAI_WHISPER_DEPLOYMENT or OPENAI_API_KEY'
+                }
+            };
+            return;
+        }
+
+        context.log(`Using ${useAzureOpenAI ? 'Azure OpenAI' : 'OpenAI'} Whisper`);
+
         // Determine file extension from MIME type
         let extension = 'm4a';
         if (mimeType) {
@@ -45,7 +63,6 @@ module.exports = async function (context, req) {
         formData.append('language', 'en');
 
         // Choose API based on configuration
-        const useAzureOpenAI = process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_KEY && process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT;
         const apiUrl = useAzureOpenAI
             ? `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT}/audio/transcriptions?api-version=2024-10-21`
             : 'https://api.openai.com/v1/audio/transcriptions';
@@ -53,6 +70,9 @@ module.exports = async function (context, req) {
         const headers = useAzureOpenAI
             ? { 'api-key': process.env.AZURE_OPENAI_KEY }
             : { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` };
+
+        context.log(`Whisper API URL: ${apiUrl}`);
+        context.log(`Audio size: ${audioBuffer.length} bytes, format: ${extension}`);
 
         // Forward to Whisper API
         const response = await fetch(apiUrl, {
@@ -66,18 +86,22 @@ module.exports = async function (context, req) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            context.log(`❌ Whisper API error: ${errorText}`);
+            context.log(`❌ Whisper API error (${response.status}): ${errorText}`);
             context.res = {
                 status: response.status,
                 jsonBody: { 
                     error: 'Transcription failed',
-                    details: errorText
+                    details: errorText,
+                    statusCode: response.status,
+                    apiUrl: apiUrl.replace(/api-key=[^&]*/, 'api-key=***')
                 }
             };
             return;
         }
 
         const result = await response.json();
+        
+        context.log(`✅ Transcription successful: "${result.text}"`);
         
         context.res = {
             status: 200,

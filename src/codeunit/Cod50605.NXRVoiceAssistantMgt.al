@@ -5,15 +5,35 @@
 codeunit 50605 "NXR Voice Assistant Mgt."
 {
     /// <summary>
-    /// Processes a natural language query and returns a formatted response.
+    /// Processes a natural language query with conversation history and returns a formatted response with follow-up suggestions.
     /// </summary>
     /// <param name="QueryText">The natural language query from the user.</param>
+    /// <param name="ConversationHistory">JSON array of previous messages with role/content.</param>
     /// <param name="BackendUrl">Optional Azure backend URL for advanced AI processing.</param>
     /// <param name="BCBaseUrl">Base URL of the Business Central web service.</param>
-    /// <returns>A natural language response to the user's query.</returns>
-    procedure ProcessQuery(QueryText: Text; BackendUrl: Text; BCBaseUrl: Text): Text
+    /// <returns>A natural language response with follow-up suggestions.</returns>
+    procedure ProcessQueryWithHistory(QueryText: Text; ConversationHistory: JsonArray; BackendUrl: Text; BCBaseUrl: Text): Text
     var
         Intent: Record "NXR Voice Query Intent" temporary;
+        AIService: Codeunit "NXR Voice AI Service";
+        ResponseText: Text;
+        FollowUpText: Text;
+    begin
+        // First get the main response using existing logic with history
+        ResponseText := ProcessQueryWithHistoryInternal(QueryText, ConversationHistory, BackendUrl, BCBaseUrl, Intent);
+        
+        // Generate follow-up suggestions based on the query and result
+        FollowUpText := AIService.GenerateFollowUpSuggestions(QueryText, ResponseText, Intent."Structured Data", ConversationHistory);
+        
+        // Append follow-ups if generated
+        if FollowUpText <> '' then
+            ResponseText += '\n\n' + FollowUpText;
+            
+        exit(ResponseText);
+    end;
+
+    local procedure ProcessQueryWithHistoryInternal(QueryText: Text; ConversationHistory: JsonArray; BackendUrl: Text; BCBaseUrl: Text; var Intent: Record "NXR Voice Query Intent" temporary): Text
+    var
         AIService: Codeunit "NXR Voice AI Service";
         DynamicQueryExecutor: Codeunit "NXR Voice Dynamic Query Exec.";
         GenericODataExecutor: Codeunit "NXR Generic OData Executor";
@@ -27,15 +47,16 @@ codeunit 50605 "NXR Voice Assistant Mgt."
         DebugInfo: Text;
     begin
         // DEBUG: Capture original query
-        // DEBUG: Capture original query
         if Setup.Get() and Setup."Debug Mode" then
             DebugInfo := '[DEBUG] Original Query: "' + QueryText + '"';
 
-        // Try AI analysis first if configured
-        if AIService.AnalyzeQueryWithAI(QueryText, Intent) then begin
+        // Try AI analysis with conversation history
+        if AIService.AnalyzeQueryWithHistory(QueryText, ConversationHistory, Intent) then begin
             // AI returned structured data - use it
             if Intent."Structured Data" <> '' then begin
                 if StructuredQueryJson.ReadFrom(Intent."Structured Data") then begin
+                    if DebugInfo <> '' then
+                        DebugInfo += '\\n[DEBUG] AI Structured Data: ' + Intent."Structured Data";
                     // Check execution mode and route appropriately
                     if StructuredQueryJson.Get('executionMode', ExecutionModeToken) then
                         ExecutionMode := ExecutionModeToken.AsValue().AsText();
@@ -44,11 +65,15 @@ codeunit 50605 "NXR Voice Assistant Mgt."
                     if StructuredQueryJson.Get('intent', ExecutionModeToken) then begin
                         if ExecutionModeToken.AsValue().AsText() = 'selectCompany' then begin
                             ResponseText := HandleCompanySelection(StructuredQueryJson);
-                            exit(ResponseText);
+                            exit(ApplyDebug(ResponseText, DebugInfo));
                         end;
                         if ExecutionModeToken.AsValue().AsText() = 'currentCompany' then begin
                             ResponseText := HandleCurrentCompanyQuery();
-                            exit(ResponseText);
+                            exit(ApplyDebug(ResponseText, DebugInfo));
+                        end;
+                        if ExecutionModeToken.AsValue().AsText() = 'unsupported' then begin
+                            ResponseText := HandleUnsupportedQuery(StructuredQueryJson);
+                            exit(ApplyDebug(ResponseText, DebugInfo));
                         end;
                     end;
 
@@ -57,39 +82,77 @@ codeunit 50605 "NXR Voice Assistant Mgt."
                             begin
                                 // Use Generic OData Executor for advanced queries
                                 if GenericODataExecutor.ExecuteODataQuery(StructuredQueryJson, ResultData, RecordCount, ResponseText) then
-                                    exit(ResponseText)
+                                    exit(ApplyDebug(ResponseText, DebugInfo))
                                 else begin
                                     // OData executor failed - return the error
                                     if ResponseText = '' then
                                         ResponseText := 'I encountered an error processing that query with OData.';
-                                    exit(ResponseText);
+                                    exit(ApplyDebug(ResponseText, DebugInfo));
                                 end;
                             end;
                         'native', '':
                             begin
                                 // Use Native Dynamic Executor for standard queries
                                 if DynamicQueryExecutor.ExecuteStructuredQuery(StructuredQueryJson, ResultData, RecordCount, ResponseText) then
-                                    exit(ResponseText)
+                                    exit(ApplyDebug(ResponseText, DebugInfo))
                                 else begin
                                     // Native executor failed - return error
                                     if ResponseText = '' then
                                         ResponseText := 'I encountered an error processing that query.';
-                                    exit(ResponseText);
+                                    exit(ApplyDebug(ResponseText, DebugInfo));
                                 end;
                             end;
                     end;
                 end;
             end;
-            // AI parsed but no structured data - use legacy executor
-            exit(ExecuteQueryAndFormatResponse(Intent, QueryText));
+            // AI parsed but no structured data
+            if DebugInfo <> '' then
+                DebugInfo += '\\n[DEBUG] AI returned no structured data';
+
+            // Check if fallback to pattern matching is enabled
+            if Setup.Get() and Setup."Fallback to Pattern Matching" then begin
+                if DebugInfo <> '' then
+                    DebugInfo += '\\n[DEBUG] Falling back to pattern matching';
+                exit(ExecuteQueryAndFormatResponse(Intent, QueryText));
+            end else
+                exit(ApplyDebug('I couldn''t analyze that query. The AI didn''t return structured data.', DebugInfo));
         end;
 
-        // Fallback to pattern matching if AI not available
+        // AI not available - check if fallback enabled
+        if Setup.Get() and not Setup."Fallback to Pattern Matching" then
+            exit('AI backend is not available. Please configure the Voice Assistant Setup.');
+
+        // Fallback to pattern matching
+        if DebugInfo <> '' then
+            DebugInfo += '\\n[DEBUG] Using pattern matching (AI not available)';
+
         if not AnalyzeQueryIntent(QueryText, Intent) then
-            exit('I didn''t understand that query. Try asking about customers, sales orders, or items.');
+            exit(ApplyDebug('I didn''t understand that query. Try asking about customers, sales orders, or items.', DebugInfo));
 
         // Execute the query and return response
         exit(ExecuteQueryAndFormatResponse(Intent, QueryText));
+    end;
+
+    /// <summary>
+    /// Processes a natural language query and returns a formatted response.
+    /// </summary>
+    /// <param name="QueryText">The natural language query from the user.</param>
+    /// <param name="BackendUrl">Optional Azure backend URL for advanced AI processing.</param>
+    /// <param name="BCBaseUrl">Base URL of the Business Central web service.</param>
+    /// <returns>A natural language response to the user's query.</returns>
+    procedure ProcessQuery(QueryText: Text; BackendUrl: Text; BCBaseUrl: Text): Text
+    var
+        EmptyHistory: JsonArray;
+    begin
+        // Delegate to new method with empty history for backward compatibility
+        exit(ProcessQueryWithHistory(QueryText, EmptyHistory, BackendUrl, BCBaseUrl));
+    end;
+
+    local procedure ApplyDebug(ResponseText: Text; DebugInfo: Text): Text
+    begin
+        if DebugInfo <> '' then
+            exit(DebugInfo + '\\n' + ResponseText);
+        exit(ResponseText);
     end;
 
     local procedure AnalyzeQueryIntent(QueryText: Text; var Intent: Record "NXR Voice Query Intent" temporary): Boolean
@@ -189,21 +252,65 @@ codeunit 50605 "NXR Voice Assistant Mgt."
         EntityName: Text;
         Setup: Record "NXR Voice Assistant Setup";
         DebugPrefix: Text;
+        RecordNo: Text;
     begin
         if Setup.Get() and Setup."Debug Mode" then
             DebugPrefix := '[DEBUG] FormatResponse called - RecordCount=' + Format(RecordCount) + ', Entity=' + Format(Intent.Entity) + ', TopN=' + Format(Intent."Top N") + '\\\n';
-
         if RecordCount = 0 then
             exit(DebugPrefix + 'I couldn''t find any matching records.');
 
         EntityName := Format(Intent.Entity);
 
-        if RecordCount = 1 then
-            exit(DebugPrefix + StrSubstNo('I found 1 %1.', EntityName))
-        else if Intent."Top N" > 0 then
-            exit(DebugPrefix + StrSubstNo('Here are the top %1 %2s.', Intent."Top N", EntityName))
+        if RecordCount = 1 then begin
+            if TryGetSingleRecordNo(Data, Intent.Entity, RecordNo) then
+                exit(DebugPrefix + StrSubstNo('%1 %2.', EntityName, RecordNo));
+            exit(DebugPrefix + StrSubstNo('I found 1 %1.', EntityName));
+        end else if Intent."Top N" > 0 then
+                exit(DebugPrefix + StrSubstNo('Here are the top %1 %2s.', Intent."Top N", EntityName))
         else
             exit(DebugPrefix + StrSubstNo('I found %1 %2s.', RecordCount, EntityName));
+    end;
+
+    local procedure TryGetSingleRecordNo(Data: JsonObject; Entity: Enum "NXR Voice Entity Type"; var RecordNo: Text): Boolean
+    begin
+        case Entity of
+            Entity::SalesOrder:
+                exit(TryGetFirstArrayField(Data, 'salesOrders', 'no', RecordNo));
+            Entity::SalesInvoice:
+                exit(TryGetFirstArrayField(Data, 'salesInvoices', 'no', RecordNo));
+            Entity::PurchaseOrder:
+                exit(TryGetFirstArrayField(Data, 'purchaseOrders', 'no', RecordNo));
+            Entity::PurchaseInvoice:
+                exit(TryGetFirstArrayField(Data, 'purchaseInvoices', 'no', RecordNo));
+        end;
+        exit(false);
+    end;
+
+    local procedure TryGetFirstArrayField(Data: JsonObject; ArrayName: Text; FieldName: Text; var FieldValue: Text): Boolean
+    var
+        Token: JsonToken;
+        Arr: JsonArray;
+        ItemToken: JsonToken;
+        Obj: JsonObject;
+        FieldToken: JsonToken;
+    begin
+        if not Data.Get(ArrayName, Token) then
+            exit(false);
+
+        if not Token.IsArray() then
+            exit(false);
+
+        Arr := Token.AsArray();
+        if Arr.Count() = 0 then
+            exit(false);
+
+        Arr.Get(0, ItemToken);
+        Obj := ItemToken.AsObject();
+        if not Obj.Get(FieldName, FieldToken) then
+            exit(false);
+
+        FieldValue := FieldToken.AsValue().AsText();
+        exit(FieldValue <> '');
     end;
 
     local procedure HandleCompanySelection(QueryJson: JsonObject): Text
@@ -256,6 +363,20 @@ codeunit 50605 "NXR Voice Assistant Mgt."
             exit(StrSubstNo('You are currently working in company "%1".', SelectedCompany))
         else
             exit(StrSubstNo('You are currently working in company "%1" (the default company).', CompanyName()));
+    end;
+
+    local procedure HandleUnsupportedQuery(QueryJson: JsonObject): Text
+    var
+        MessageToken: JsonToken;
+        Message: Text;
+    begin
+        if QueryJson.Get('message', MessageToken) then
+            Message := MessageToken.AsValue().AsText();
+
+        if Message <> '' then
+            exit(Message)
+        else
+            exit('This type of query is not yet supported. Try asking for specific records, counts, or top/biggest queries.');
     end;
 
     local procedure GetJsonText(JObject: JsonObject; PropertyName: Text): Text
