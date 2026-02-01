@@ -1,4 +1,4 @@
-﻿# Dependencies
+# Dependencies
 node_modules/
 package-lock.json
 npm-debug.log
@@ -6,9 +6,16 @@ npm-debug.log
 # Build outputs
 dist/
 build/
-output/
 .env
 .env.local
+
+# Output folder - ignore specific patterns but allow .app files
+output/.alpackages/
+output/.vscode/
+output/bin/
+output/obj/
+output/*.zip
+output/*.log
 
 # Azure & Credentials
 local.settings.json
@@ -38,9 +45,6 @@ azure-relay-deploy-temp/
 .snapshots/
 
 # Build artifacts
-# Keep latest release for hackathon submission
-*.app
-!Nexer Enterprise Applications UK_NXR Voice Assistant_2.1.4.3.app
 .alpackages/
 .altestrunner/
 
