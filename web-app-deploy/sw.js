@@ -31,10 +31,18 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - network first, then cache
+// Fetch event - network first, then cache, with fallback
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
-      .catch(() => caches.match(event.request))
+      .catch(() => {
+        return caches.match(event.request).then((response) => {
+          return response || new Response('Offline', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({ 'Content-Type': 'text/plain' })
+          });
+        });
+      })
   );
 });
