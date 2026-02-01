@@ -1,69 +1,50 @@
-const https = require('https');
-const { URL } = require('url');
+const FormData = require('form-data');
+const fetch = require('node-fetch');
 
-function makeHttpsRequest(url, options, body) {
-    return new Promise((resolve, reject) => {
-        const parsedUrl = new URL(url);
-
-        const requestOptions = {
-            hostname: parsedUrl.hostname,
-            port: parsedUrl.port || 443,
-            path: parsedUrl.pathname + parsedUrl.search,
-            method: options.method || 'POST',
-            headers: options.headers || {}
-        };
-
-        const req = https.request(requestOptions, (res) => {
-            let data = '';
-            res.on('data', (chunk) => { data += chunk; });
-            res.on('end', () => {
-                resolve({ statusCode: res.statusCode, body: data, headers: res.headers });
-            });
-        });
-
-        req.on('error', reject);
-        if (body) req.write(body);
-        req.end();
-    });
-}
-
-function createMultipartBody(audioBuffer, filename, mimeType) {
-    const boundary = `----WebKitFormBoundary${Date.now()}${Math.random().toString(36)}`;
-    const CRLF = '\r\n';
-
-    let body = '';
-    body += `--${boundary}${CRLF}`;
-    body += `Content-Disposition: form-data; name="file"; filename="${filename}"${CRLF}`;
-    body += `Content-Type: ${mimeType}${CRLF}${CRLF}`;
-
-    const preamble = Buffer.from(body, 'utf8');
-    const epilogue = Buffer.from(`${CRLF}--${boundary}--${CRLF}`, 'utf8');
-
-    return {
-        boundary,
-        body: Buffer.concat([preamble, audioBuffer, epilogue])
-    };
-}
-
-function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
+/**
+ * Azure Function: Audio Transcription Proxy
+ * 
+ * Receives base64 audio from iOS/Android app and forwards to Azure OpenAI Whisper API
+ * Solves the AL multipart/form-data limitation
+ */
 
 module.exports = async function (context, req) {
-    context.log('Transcription request received (no-deps clean version)');
+    context.log('Transcription request received');
 
     try {
-        const { audioData, mimeType } = req.body || {};
+        const body = req.body;
+        const { audioData, mimeType } = body;
 
         if (!audioData) {
             context.res = {
                 status: 400,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ error: 'No audio data provided' })
+                jsonBody: { error: 'No audio data provided' }
             };
             return;
         }
 
+        // Check if Whisper is configured
+        const useAzureOpenAI = process.env.AZURE_OPENAI_ENDPOINT && 
+                               process.env.AZURE_OPENAI_KEY && 
+                               process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT;
+        const useOpenAI = process.env.OPENAI_API_KEY;
+
+        if (!useAzureOpenAI && !useOpenAI) {
+            context.log('❌ No Whisper API configured');
+            context.res = {
+                status: 500,
+                jsonBody: { 
+                    error: 'Whisper transcription not configured',
+                    details: 'Missing AZURE_OPENAI_WHISPER_DEPLOYMENT or OPENAI_API_KEY',
+                    hint: 'Please configure Azure OpenAI Whisper deployment or OpenAI API key in Function App settings'
+                }
+            };
+            return;
+        }
+
+        context.log(`Using ${useAzureOpenAI ? 'Azure OpenAI' : 'OpenAI'} Whisper`);
+
+        // Determine file extension from MIME type
         let extension = 'm4a';
         if (mimeType) {
             if (mimeType.includes('wav')) extension = 'wav';
@@ -72,88 +53,117 @@ module.exports = async function (context, req) {
             else if (mimeType.includes('ogg')) extension = 'ogg';
         }
 
+        // Convert base64 to buffer
         const audioBuffer = Buffer.from(audioData, 'base64');
-        context.log(`Audio buffer size: ${audioBuffer.length} bytes`);
+        context.log(`Audio size: ${audioBuffer.length} bytes, format: ${extension}`);
 
-        const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
-        const apiKey = process.env.AZURE_OPENAI_KEY;
-        const deployment = process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT;
-        const apiVersion = process.env.AZURE_OPENAI_API_VERSION || '2024-10-21';
+        // Create form data for OpenAI Whisper API
+        const formData = new FormData();
+        formData.append('file', audioBuffer, {
+            filename: `audio.${extension}`,
+            contentType: mimeType || 'audio/mp4'
+        });
+        formData.append('model', 'whisper-1');
+        formData.append('language', 'en');
 
-        if (!endpoint || !apiKey || !deployment) {
-            throw new Error('Azure OpenAI configuration missing. Required: AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, AZURE_OPENAI_WHISPER_DEPLOYMENT');
-        }
+        // Choose API based on configuration
+        const apiUrl = useAzureOpenAI
+            ? `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT}/audio/transcriptions?api-version=2024-10-21`
+            : 'https://api.openai.com/v1/audio/transcriptions';
 
-        const whisperUrl = `${endpoint}/openai/deployments/${deployment}/audio/transcriptions?api-version=${apiVersion}`;
-        context.log(`Calling Whisper at ${whisperUrl}`);
+        const headers = useAzureOpenAI
+            ? { 'api-key': process.env.AZURE_OPENAI_KEY }
+            : { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` };
 
-        const { boundary, body: multipartBody } = createMultipartBody(
-            audioBuffer,
-            `audio.${extension}`,
-            mimeType || 'audio/mp4'
-        );
+        context.log(`Whisper API URL: ${apiUrl.replace(/api-key=[^&]*/, 'api-key=***')}`);
 
+        // Forward to Whisper API with retry logic
         const maxAttempts = 3;
-        let attempt = 0;
-        let response;
+        let lastError = null;
 
-        while (attempt < maxAttempts) {
-            attempt += 1;
-            response = await makeHttpsRequest(whisperUrl, {
-                method: 'POST',
-                headers: {
-                    'api-key': apiKey,
-                    'Content-Type': `multipart/form-data; boundary=${boundary}`,
-                    'Content-Length': multipartBody.length
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        ...formData.getHeaders(),
+                        ...headers
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    context.log(`✅ Transcription successful: "${result.text}"`);
+                    
+                    context.res = {
+                        status: 200,
+                        jsonBody: {
+                            text: result.text,
+                            success: true
+                        }
+                    };
+                    return;
                 }
-            }, multipartBody);
 
-            context.log(`Whisper status: ${response.statusCode} (attempt ${attempt})`);
+                // Handle error responses
+                const errorText = await response.text();
+                context.log(`❌ Whisper API error (${response.status}, attempt ${attempt}/${maxAttempts}): ${errorText}`);
+                
+                // If rate limited (429), retry after delay
+                if (response.status === 429 && attempt < maxAttempts) {
+                    const retryAfter = response.headers.get('retry-after');
+                    const delayMs = retryAfter ? parseInt(retryAfter) * 1000 : 2000 * attempt;
+                    context.log(`Rate limited, retrying in ${delayMs}ms...`);
+                    await new Promise(resolve => setTimeout(resolve, delayMs));
+                    continue;
+                }
 
-            if (response.statusCode !== 429) {
-                break;
+                // Store error for final response
+                lastError = {
+                    status: response.status,
+                    details: errorText
+                };
+
+                // Don't retry on client errors (400, 401, 403, etc.)
+                if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+                    break;
+                }
+
+            } catch (fetchError) {
+                context.log(`❌ Fetch error (attempt ${attempt}/${maxAttempts}): ${fetchError.message}`);
+                lastError = {
+                    status: 500,
+                    details: fetchError.message
+                };
+                
+                // Retry on network errors
+                if (attempt < maxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+                    continue;
+                }
             }
-
-            const retryAfterHeader = response.headers?.['retry-after'];
-            const retryMs = retryAfterHeader ? parseInt(retryAfterHeader, 10) * 1000 : 1500 * attempt;
-            context.log(`429 rate limit; retrying in ${retryMs} ms`);
-            await delay(retryMs);
         }
 
-        if (!response || response.statusCode !== 200) {
-            context.log(`Whisper error body: ${response?.body}`);
-            context.res = {
-                status: response?.statusCode || 500,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    error: 'Transcription failed',
-                    details: response?.body || 'Unknown error',
-                    rateLimited: response?.statusCode === 429
-                })
-            };
-            return;
-        }
-
-        const result = JSON.parse(response.body);
-        context.log(`Transcription text: ${result.text}`);
-
+        // All attempts failed
         context.res = {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                text: result.text,
-                language: result.language || 'en'
-            })
+            status: lastError?.status || 500,
+            jsonBody: { 
+                error: 'Transcription failed',
+                details: lastError?.details || 'Unknown error',
+                attempts: maxAttempts
+            }
         };
+
     } catch (error) {
-        context.log(`Transcription error: ${error.message}`);
+        context.log(`❌ Transcription error: ${error.message}`);
+        context.log(`Stack trace: ${error.stack}`);
         context.res = {
             status: 500,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            jsonBody: { 
                 error: 'Internal server error',
-                message: error.message
-            })
+                message: error.message 
+            }
         };
     }
 };

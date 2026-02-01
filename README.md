@@ -4,6 +4,7 @@
 
 [![Business Central](https://img.shields.io/badge/Business%20Central-27.0-blue)](https://dynamics.microsoft.com/en-us/business-central)
 [![Azure OpenAI](https://img.shields.io/badge/Azure%20OpenAI-GPT--4o--mini-green)](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
+[![Version](https://img.shields.io/badge/Version-2.2.0.21-brightgreen)](https://github.com/yourusername/BC-Voice-Assistant/releases)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## 🏆 The Hackathon Challenge

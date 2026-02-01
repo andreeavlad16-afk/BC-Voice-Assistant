@@ -53,7 +53,7 @@ codeunit 50612 "NXR Voice Speech Transcription"
     begin
         // Check if transcription proxy is configured
         TranscriptionProxyUrl := Setup."Transcription Proxy URL";
-        
+
         if TranscriptionProxyUrl = '' then
             exit('Audio transcription requires an Azure Function proxy. Configure "Transcription Proxy URL" in Voice Assistant Setup, or use the PWA for direct browser speech recognition.');
 
@@ -79,8 +79,13 @@ codeunit 50612 "NXR Voice Speech Transcription"
 
         Response.Content().ReadAs(ResponseText);
 
-        if not ResponseJson.ReadFrom(ResponseText) then
+        // DEBUG: Log the exact response for troubleshooting
+        Message('DEBUG Response: [%1]', ResponseText);
+
+        if not ResponseJson.ReadFrom(ResponseText) then begin
+            Message('JSON Parse failed for: %1', ResponseText);
             exit('Invalid response from transcription service');
+        end;
 
         // Check success
         if ResponseJson.Get('success', SuccessToken) then
@@ -144,17 +149,17 @@ codeunit 50612 "NXR Voice Speech Transcription"
 
         // Build multipart/form-data request
         // Format: --boundary\r\nheaders\r\n\r\nbinarydata\r\n--boundary\r\nheaders\r\n\r\nvalue\r\n--boundary--
-        
+
         RequestBody.Append('--' + Boundary + '\r\n');
         RequestBody.Append('Content-Disposition: form-data; name="file"; filename="' + FileName + '"\r\n');
         RequestBody.Append('Content-Type: ' + MimeType + '\r\n');
         RequestBody.Append('\r\n');
-        
+
         // Read binary audio data
         TempBlob.CreateInStream(InStr);
         InStr.ReadText(AudioDataText);
         RequestBody.Append(AudioDataText);
-        
+
         RequestBody.Append('\r\n--' + Boundary + '\r\n');
         RequestBody.Append('Content-Disposition: form-data; name="model"\r\n');
         RequestBody.Append('\r\n');

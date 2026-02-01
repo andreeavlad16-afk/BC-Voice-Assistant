@@ -18,7 +18,8 @@ module.exports = async function (context, req) {
         if (!audioData) {
             context.res = {
                 status: 400,
-                jsonBody: { error: 'No audio data provided' }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ error: 'No audio data provided' })
             };
             return;
         }
@@ -31,10 +32,11 @@ module.exports = async function (context, req) {
             context.log('❌ No Whisper API configured');
             context.res = {
                 status: 500,
-                jsonBody: { 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
                     error: 'Whisper transcription not configured',
                     details: 'Missing AZURE_OPENAI_WHISPER_DEPLOYMENT or OPENAI_API_KEY'
-                }
+                })
             };
             return;
         }
@@ -89,12 +91,13 @@ module.exports = async function (context, req) {
             context.log(`❌ Whisper API error (${response.status}): ${errorText}`);
             context.res = {
                 status: response.status,
-                jsonBody: { 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
                     error: 'Transcription failed',
                     details: errorText,
                     statusCode: response.status,
                     apiUrl: apiUrl.replace(/api-key=[^&]*/, 'api-key=***')
-                }
+                })
             };
             return;
         }
@@ -103,22 +106,32 @@ module.exports = async function (context, req) {
         
         context.log(`✅ Transcription successful: "${result.text}"`);
         
+        const responseBody = {
+            text: result.text,
+            success: true
+        };
+        
+        const bodyString = JSON.stringify(responseBody);
+        context.log(`Response body string: ${bodyString}`);
+        
         context.res = {
             status: 200,
-            jsonBody: {
-                text: result.text,
-                success: true
-            }
+            headers: { 
+                'Content-Type': 'application/json; charset=utf-8',
+                'Content-Length': Buffer.byteLength(bodyString, 'utf8').toString()
+            },
+            body: bodyString
         };
 
     } catch (error) {
         context.log(`❌ Transcription error: ${error.message}`);
         context.res = {
             status: 500,
-            jsonBody: { 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
                 error: 'Internal server error',
                 message: error.message 
-            }
+            })
         };
     }
 };

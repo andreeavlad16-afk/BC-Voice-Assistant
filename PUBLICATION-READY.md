@@ -98,10 +98,10 @@ Created a comprehensive README.md showcasing:
    git clone https://github.com/YOUR-USERNAME/bc-voice-assistant.git
    cd bc-voice-assistant
    
-   # Search for any leaked credentials
-   grep -r "DM0UFaALfoUW4oJUskgFOWc" . 2>/dev/null
-   grep -r "jenYkEXwrhCj3lmeoQxV3bFuWJWR" . 2>/dev/null
-   grep -r "M365x77295693" . 2>/dev/null
+   # Search for any leaked credentials (replace with your actual patterns)
+   grep -r "YOUR_API_KEY_PATTERN" . 2>/dev/null
+   grep -r "YOUR_SECRET_PATTERN" . 2>/dev/null
+   grep -r "YOUR_TENANT_ID_PATTERN" . 2>/dev/null
    
    # Should return: No matches found
    

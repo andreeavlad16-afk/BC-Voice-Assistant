@@ -5,12 +5,14 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 8px;
-    color: white;
-    min-height: 250px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 6px 18px rgba(17, 24, 39, 0.08);
+    color: #1f2937;
+    min-height: 220px;
 }
 
 .status-section {
@@ -21,37 +23,42 @@
 .status {
     font-size: 18px;
     font-weight: 600;
-    padding: 10px 20px;
-    border-radius: 20px;
+    padding: 8px 16px;
+    border-radius: 999px;
     margin-bottom: 15px;
     display: inline-block;
     transition: all 0.3s ease;
 }
 
 .status.ready {
-    background-color: rgba(76, 175, 80, 0.3);
-    border: 2px solid #4CAF50;
+    background-color: #ecfdf3;
+    border: 1px solid #86efac;
+    color: #166534;
 }
 
 .status.listening {
-    background-color: rgba(33, 150, 243, 0.3);
-    border: 2px solid #2196F3;
+    background-color: #eff6ff;
+    border: 1px solid #93c5fd;
+    color: #1d4ed8;
     animation: pulse 1.5s infinite;
 }
 
 .status.speaking {
-    background-color: rgba(255, 152, 0, 0.3);
-    border: 2px solid #FF9800;
+    background-color: #fff7ed;
+    border: 1px solid #fdba74;
+    color: #9a3412;
 }
 
 .status.processing {
-    background-color: rgba(156, 39, 176, 0.3);
-    border: 2px solid #9C27B0;
+    background-color: #f5f3ff;
+    border: 1px solid #c4b5fd;
+    color: #5b21b6;
 }
 
 .status.error {
-    background-color: rgba(244, 67, 54, 0.3);
-    border: 2px solid #F44336;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
 }
 
 @keyframes pulse {
@@ -72,7 +79,7 @@
 }
 
 .microphone-icon svg {
-    color: white;
+    color: #2563eb;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
 }
 
@@ -91,23 +98,23 @@
 
 .info-section {
     text-align: center;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: #f8fafc;
     padding: 15px;
     border-radius: 8px;
-    backdrop-filter: blur(10px);
+    border: 1px solid #e5e7eb;
 }
 
 .info-text {
     font-size: 14px;
     margin: 0 0 10px 0;
-    opacity: 0.9;
+    color: #374151;
 }
 
 .examples {
     font-size: 12px;
     font-weight: 600;
     margin: 10px 0 5px 0;
-    opacity: 0.8;
+    color: #6b7280;
 }
 
 .examples-list {
@@ -115,7 +122,7 @@
     padding: 0;
     margin: 0;
     font-size: 12px;
-    opacity: 0.7;
+    color: #6b7280;
 }
 
 .examples-list li {
@@ -137,28 +144,28 @@
 .text-input-container {
     display: flex;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 25px;
-    padding: 5px 5px 5px 15px;
-    backdrop-filter: blur(10px);
+    background: #f9fafb;
+    border-radius: 999px;
+    padding: 6px 6px 6px 14px;
+    border: 1px solid #e5e7eb;
 }
 
 .text-input-container input {
     flex: 1;
     border: none;
     background: transparent;
-    color: white;
+    color: #111827;
     font-size: 14px;
     outline: none;
     min-width: 0;
 }
 
 .text-input-container input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: #9ca3af;
 }
 
 .text-input-container button {
-    background: rgba(255, 255, 255, 0.25);
+    background: #2563eb;
     border: none;
     border-radius: 50%;
     width: 40px;
@@ -172,7 +179,7 @@
 }
 
 .text-input-container button:hover {
-    background: rgba(255, 255, 255, 0.4);
+    background: #1d4ed8;
 }
 
 .text-input-container button:active {
@@ -182,7 +189,7 @@
 /* Microphone hint for tap */
 .mic-hint {
     font-size: 12px;
-    opacity: 0.7;
+    color: #6b7280;
     margin-top: 5px;
 }
 
@@ -190,7 +197,7 @@
 .ai-status {
     font-size: 12px;
     margin-top: 10px;
-    opacity: 0.8;
+    color: #6b7280;
 }
 
 .ai-status.ai-active {
@@ -217,4 +224,50 @@
 
 .input-mode.unavailable {
     color: #FF5722;
+}
+
+/* Mobile layout tweaks */
+@media (max-width: 640px) {
+    .voice-control-container {
+        padding: 12px;
+        min-height: 200px;
+        border-radius: 10px;
+    }
+
+    .status {
+        font-size: 16px;
+        padding: 6px 12px;
+        margin-bottom: 10px;
+    }
+
+    .microphone-icon svg {
+        width: 60px;
+        height: 60px;
+    }
+
+    .info-section {
+        padding: 12px;
+    }
+
+    .text-input-section {
+        max-width: 100%;
+        margin: 10px 0;
+    }
+
+    .text-input-container {
+        padding: 6px;
+    }
+
+    .text-input-container input {
+        font-size: 16px;
+    }
+
+    .text-input-container button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .examples-list li {
+        margin: 6px 0;
+    }
 }

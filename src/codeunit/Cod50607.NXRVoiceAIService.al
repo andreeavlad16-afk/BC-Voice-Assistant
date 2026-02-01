@@ -32,8 +32,10 @@ codeunit 50607 "NXR Voice AI Service"
         if not LoadSetup() then
             exit(false);
 
-        if Setup."Debug Mode" then
-            DebugInfo := StrSubstNo('[DEBUG] Analyzing query with %1: "%2"\', Format(Setup."AI Backend Type"), QueryText);
+        if Setup."Debug Mode" then begin
+            Message('[DEBUG] AI Backend Type: ' + Format(Setup."AI Backend Type"));
+            Message('[DEBUG] Analyzing query: "' + QueryText + '"');
+        end;
 
         case Setup."AI Backend Type" of
             Setup."AI Backend Type"::LocalLLM:
@@ -77,16 +79,17 @@ codeunit 50607 "NXR Voice AI Service"
             exit('');
 
         // Build prompt for follow-up generation
-        PromptText := 'Based on this query and result, suggest 2-3 relevant follow-up questions the user might ask next.\n\n';
-        PromptText += 'User Query: ' + QueryText + '\n';
-        PromptText += 'System Response: ' + ResponseText + '\n\n';
+        PromptText := 'Based on this query and result, suggest 2 relevant follow-up questions. ';
+        PromptText += 'User Query: ' + QueryText + ' ';
+        PromptText += 'System Response: ' + ResponseText + ' ';
         if StructuredData <> '' then
-            PromptText += 'Query Structure: ' + StructuredData + '\n\n';
-        PromptText += 'Generate ONLY 2-3 short follow-up questions (one per line, no numbering, no explanations). Examples:\n';
-        PromptText += '- If they asked about customers, suggest: "Show me orders from my top customer" or "Which customers are in London?"\n';
-        PromptText += '- If they asked about counts, suggest showing the actual list\n';
-        PromptText += '- If they filtered by city, suggest other cities or related queries\n';
-        PromptText += 'Format as: "You might also ask:\\n- Question 1\\n- Question 2"';
+            PromptText += 'Query Structure: ' + StructuredData + ' ';
+        PromptText += 'CRITICAL OUTPUT FORMAT: ';
+        PromptText += '1. Start IMMEDIATELY with the text You might also ask (no leading characters, spaces, or line breaks). ';
+        PromptText += '2. Then add a line break. ';
+        PromptText += '3. Then list 2 questions, each on its own line starting with a dash. ';
+        PromptText += '4. Use ONLY plain text - NO backslashes, NO escape sequences like \n, NO special characters. ';
+        PromptText += '5. Do NOT prefix your response with any letters like "n" or whitespace.';
 
         // Build request with conversation history
         BuildFollowUpRequest(PromptText, ConversationHistory, RequestJson);
@@ -388,21 +391,43 @@ codeunit 50607 "NXR Voice AI Service"
         if not Setup.HasApiKey() then
             exit(false);
 
+        if Setup."Debug Mode" then
+            Message('[DEBUG] About to call Azure...');
         AzureUrl := BuildAzureUrl();
         RequestJson := BuildOpenAIRequestWithHistory(QueryText, ConversationHistory);
         PrepareRequestFromJson(RequestContent, RequestJson);
         AddAzureAuthHeader(Client);
 
-        if not Client.Post(AzureUrl, RequestContent, Response) then
-            exit(false);
+        // Add timeout for reliability
+        Client.Timeout(30000); // 30 seconds
 
-        if not Response.IsSuccessStatusCode() then
+        if not Client.Post(AzureUrl, RequestContent, Response) then begin
+            // HTTP post failed - could be network issue
+            if Setup."Debug Mode" then
+                Message('[DEBUG] Azure POST failed - network/connection issue');
             exit(false);
+        end;
+
+        if Setup."Debug Mode" then
+            Message('[DEBUG] Post succeeded, checking status...');
+        if not Response.IsSuccessStatusCode() then begin
+            // Azure returned error status
+            Response.Content().ReadAs(ResponseText);
+            if Setup."Debug Mode" then
+                Message('[DEBUG] Azure returned status ' + Format(Response.HttpStatusCode()) + ': ' + ResponseText);
+            exit(false);
+        end;
 
         Response.Content().ReadAs(ResponseText);
-        if not ResponseJson.ReadFrom(ResponseText) then
+        if not ResponseJson.ReadFrom(ResponseText) then begin
+            // Response is not valid JSON
+            if Setup."Debug Mode" then
+                Message('[DEBUG] Azure response is not valid JSON: ' + ResponseText);
             exit(false);
+        end;
 
+        if Setup."Debug Mode" then
+            Message('[DEBUG] Parsing AI response...');
         exit(ParseAIResponse(ResponseJson, Intent));
     end;
 
@@ -791,26 +816,43 @@ codeunit 50607 "NXR Voice AI Service"
         SpecificFilterToken: JsonToken;
         FullStructuredQueryTxt: Text;
     begin
-        if not ResponseJson.Get('choices', ChoicesToken) then
+        if not ResponseJson.Get('choices', ChoicesToken) then begin
+            if Setup."Debug Mode" then
+                Message('[DEBUG] ParseAIResponse: No choices in response');
             exit(false);
+        end;
 
         ChoicesArray := ChoicesToken.AsArray();
-        if not ChoicesArray.Get(0, FirstChoice) then
+        if not ChoicesArray.Get(0, FirstChoice) then begin
+            if Setup."Debug Mode" then
+                Message('[DEBUG] ParseAIResponse: Empty choices array');
             exit(false);
+        end;
 
-        if not FirstChoice.AsObject().Get('message', MessageToken) then
+        if not FirstChoice.AsObject().Get('message', MessageToken) then begin
+            if Setup."Debug Mode" then
+                Message('[DEBUG] ParseAIResponse: No message in choice');
             exit(false);
+        end;
 
-        if not MessageToken.AsObject().Get('content', ContentToken) then
+        if not MessageToken.AsObject().Get('content', ContentToken) then begin
+            if Setup."Debug Mode" then
+                Message('[DEBUG] ParseAIResponse: No content in message');
             exit(false);
+        end;
 
         ContentText := ContentToken.AsValue().AsText();
+        if Setup."Debug Mode" then
+            Message('[DEBUG] AI Response Content: ' + CopyStr(ContentText, 1, 200));
 
         // Clean up response (remove markdown code blocks if present)
         ContentText := CleanJsonResponse(ContentText);
 
-        if not IntentJson.ReadFrom(ContentText) then
+        if not IntentJson.ReadFrom(ContentText) then begin
+            if Setup."Debug Mode" then
+                Message('[DEBUG] ParseAIResponse: Content is not valid JSON');
             exit(false);
+        end;
 
         Intent.Init();
         Intent."Query Text" := '';
@@ -833,6 +875,8 @@ codeunit 50607 "NXR Voice AI Service"
         IntentJson.WriteTo(FullStructuredQueryTxt);
         Intent."Structured Data" := CopyStr(FullStructuredQueryTxt, 1, MaxStrLen(Intent."Structured Data"));
 
+        if Setup."Debug Mode" then
+            Message('[DEBUG] ParseAIResponse: Success! Structured Data length: ' + Format(StrLen(Intent."Structured Data")));
         exit(true);
     end;
 
@@ -921,6 +965,8 @@ codeunit 50607 "NXR Voice AI Service"
                 Intent.Entity := Intent.Entity::SalesReturnOrder;
             'salesinvoiceheader', 'salesi nvoiceheaders':
                 Intent.Entity := Intent.Entity::SalesInvoice;
+            'salesline', 'saleslines':
+                Intent.Entity := Intent.Entity::SalesOrder;  // Map to SalesOrder for now
 
             // Purchase Documents
             'purchaseorder':
@@ -1004,6 +1050,8 @@ codeunit 50607 "NXR Voice AI Service"
         MessagesArray.Add(UserMessage);
 
         RequestJson.Add('messages', MessagesArray);
+        if Setup."Model Name" <> '' then
+            RequestJson.Add('model', Setup."Model Name");
         RequestJson.Add('temperature', 0.1);
         RequestJson.Add('max_tokens', 2000);
 
@@ -1073,7 +1121,11 @@ codeunit 50607 "NXR Voice AI Service"
         MessageToken: JsonToken;
         MessageObj: JsonObject;
         ContentToken: JsonToken;
+        ResultText: Text;
+        CRLF: Text[2];
     begin
+        CRLF[1] := 13;
+        CRLF[2] := 10;
         if not ResponseJson.Get('choices', ChoicesToken) then
             exit('');
 
@@ -1089,14 +1141,104 @@ codeunit 50607 "NXR Voice AI Service"
         if not MessageObj.Get('content', ContentToken) then
             exit('');
 
-        exit(ContentToken.AsValue().AsText());
+        // Replace literal \n with actual newlines and clean up artifacts
+        ResultText := ContentToken.AsValue().AsText();
+
+        // Remove all backslash-related artifacts (do these first)
+        ResultText := ResultText.Replace('\n', CRLF);
+        ResultText := ResultText.Replace('\\n', CRLF);
+        ResultText := ResultText.Replace('\\', '');
+        ResultText := ResultText.Replace('\', '');
+
+        // Remove standalone 'n' characters that are artifacts
+        ResultText := ResultText.Replace(CRLF + 'n' + CRLF, CRLF);  // Middle of text
+        ResultText := ResultText.Replace(CRLF + 'n ', CRLF);  // Before space
+
+        // Clean up leading artifacts (multiple patterns)
+        while ResultText.StartsWith('n' + CRLF) or ResultText.StartsWith('n ') or ResultText.StartsWith('n') do
+            ResultText := DelStr(ResultText, 1, 1).TrimStart();
+
+        // Remove extra blank lines at start
+        while ResultText.StartsWith(CRLF) do
+            ResultText := DelStr(ResultText, 1, 2);
+
+        exit(ResultText);
     end;
 
     local procedure GetSystemPrompt(): Text
     var
-        SystemPromptLbl: Label 'You are a Business Central query analyzer. Parse natural language into structured queries. Prefer single-table queries. Use native mode for all queries.', Locked = true;
+        EnhancedSystemPrompt: Text;
+        SystemPromptLbl: Label 'You are a Business Central query analyzer. Your job is to interpret natural language business questions and translate them into structured read-only database queries that return sensible, meaningful results.\\\\KEY PRINCIPLES:\\- Understand business intent, not just literal words\\- "Top customers" means highest sales volume, not first records\\- "Best" means highest value/performance metric\\- Choose appropriate sorting to make results meaningful\\- Always return read-only queries (SELECT, no INSERT/UPDATE/DELETE)\\- ALWAYS extract numbers from queries, whether written as digits (5, 10) or words (five, ten, three)\\- PREFER SINGLE-TABLE QUERIES: Use joins ONLY when data from multiple tables is truly needed\\- Most entity lists (customers, items, vendors) should be single-table queries\\- Example: "customers in London" = single table Customer with city filter, NOT a join\\\\NUMBER PARSING:\\- "five" → 5, "ten" → 10, "three" → 3, etc.\\- "top five", "top 5", "best 5", "give me 5" all mean "top": 5\\- If no number specified but query says "top/best/biggest", default to 10\\\\FILTER CONSTRUCTION RULES:\\1. Use EXACT field names from schema (case-sensitive for OData)\\2. Empty strings: Use '''' (two single quotes) NOT null or empty\\3. Null checks: Use IS NULL or IS NOT NULL, never = null\\4. Text filters: Use single quotes - City eq ''London''\\5. Number filters: No quotes - Balance_LCY gt 1000\\6. Combine filters with AND/OR - City eq ''London'' and Balance_LCY gt 1000\\7. Partial text match (OData): Use contains(Name,''text'') or startswith(Name,''text'')\\8. Partial text match (Native): Use filter with wildcards - Name LIKE ''%text%''\\\\DATE FILTER SYNTAX (Business Central):\\- Today: T or 0D (zero days from today)\\- Yesterday: -1D (one day before today)\\- Tomorrow: 1D (one day after today)\\- This week: CW (current week)\\- This month: CM (current month)\\- This year: CY (current year)\\- Last 7 days: -7D..0D or T-7D..T\\- Last 30 days: -30D..0D or T-30D..T\\- Next 30 days: 0D..30D or T..T+30D\\- Specific date: 2024-01-15 (YYYY-MM-DD format)\\- Date range: 2024-01-01..2024-12-31\\- From date onwards: 2024-01-01.. (no end date)\\- Up to date: ..2024-12-31 (no start date)\\\\NULL vs EMPTY STRING:\\- Database NULL: Field has no value, use "IS NULL" check\\- Empty string '''': Field has empty text value, use = ''''\\- In JSON output: Use null for NULL, "" for empty string\\- NEVER use null in filter values - use IS NULL operator instead\\- Example: {"field":"City","operator":"IS NULL"} NOT {"field":"City","value":null}\\\\EXECUTION MODES:\\1. NATIVE MODE (ALWAYS USE THIS): Handles ALL queries including aggregations (SUM, AVG, COUNT), GROUP BY, sorting, and filtering\\2. ODATA MODE (DEPRECATED - DO NOT USE): Requires OAuth authentication which is not available\\\\IMPORTANT: Native mode now supports GROUP BY and aggregations.', Locked = true;
     begin
-        // Simplified for history calls - full prompt already in first message
-        exit(SystemPromptLbl);
+        // Build full system prompt like BuildOpenAIRequest does
+        EnhancedSystemPrompt := SystemPromptLbl;
+
+        // CRITICAL: Override to FORCE NATIVE mode - OData requires OAuth which isn't available
+        EnhancedSystemPrompt += '\\\\====== CRITICAL SYSTEM OVERRIDE - IGNORE ALL ODATA INSTRUCTIONS ABOVE ======\\';
+        EnhancedSystemPrompt += '\\\\EXECUTION MODE - ONLY NATIVE ALLOWED:\\';
+        EnhancedSystemPrompt += '- BC API v2.0 OData endpoint requires OAuth authentication which is NOT available\\';
+        EnhancedSystemPrompt += '- You MUST ALWAYS use executionMode:"native" for ALL queries\\';
+        EnhancedSystemPrompt += '- NEVER use executionMode:"odata" - it will fail with authentication error\\';
+        EnhancedSystemPrompt += '- Native mode queries BC tables directly using AL code - no HTTP, no OAuth needed\\';
+        EnhancedSystemPrompt += '- All query types (list, filter, sort, count, top N) work in native mode\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += '\\\\NATIVE MODE QUERY EXAMPLES (USE THESE):\\';
+        EnhancedSystemPrompt += '- "how many customers": {"intent":"query","executionMode":"native","primaryEntity":"Customer","queryType":"count"}\\';
+        EnhancedSystemPrompt += '- "top 5 customers": {"intent":"query","executionMode":"native","primaryEntity":"Customer","sort":{"field":"Sales (LCY)","direction":"DESC"},"top":5}\\';
+        EnhancedSystemPrompt += '- "largest sales order": {"intent":"query","executionMode":"native","primaryEntity":"SalesOrder","sort":{"field":"Amount","direction":"DESC"},"top":1}\\';
+        EnhancedSystemPrompt += '- "last order": {"intent":"query","executionMode":"native","primaryEntity":"SalesOrder","sort":{"field":"Order Date","direction":"DESC"},"top":1}\\';
+        EnhancedSystemPrompt += '- "biggest customer": {"intent":"query","executionMode":"native","primaryEntity":"Customer","sort":{"field":"Sales (LCY)","direction":"DESC"},"top":1}\\';
+        EnhancedSystemPrompt += '- "orders this month": {"intent":"query","executionMode":"native","primaryEntity":"SalesOrder","dateFilter":{"field":"Order Date","value":"CM"}}\\';
+        EnhancedSystemPrompt += '\\\\====== END OVERRIDE - NATIVE MODE ONLY ======\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += '\\\\CRITICAL: ENTITY NAME MAPPING FOR JSON RESPONSES:\\';
+        EnhancedSystemPrompt += 'The schema above shows BC table names with spaces/periods (e.g., "Cust. Ledger Entry", "Sales Header").\\';
+        EnhancedSystemPrompt += 'When returning JSON, you MUST use these standardized entity names in primaryEntity field:\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += 'MASTER DATA:\\';
+        EnhancedSystemPrompt += '- "Customer" table → use "Customer"\\';
+        EnhancedSystemPrompt += '- "Vendor" table → use "Vendor"\\';
+        EnhancedSystemPrompt += '- "Item" table → use "Item"\\';
+        EnhancedSystemPrompt += '- "Employee" table → use "Employee"\\';
+        EnhancedSystemPrompt += '- "Location" table → use "Location"\\';
+        EnhancedSystemPrompt += '- "Bank Account" table → use "BankAccount"\\';
+        EnhancedSystemPrompt += '- "G/L Account" table → use "GLAccount"\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += 'SALES DOCUMENTS:\\';
+        EnhancedSystemPrompt += '- "Sales Header" table → use "SalesOrder"\\';
+        EnhancedSystemPrompt += '- "Sales Invoice Header" table → use "SalesInvoice"\\';
+        EnhancedSystemPrompt += '- "Sales Shipment Header" table → use "SalesShipment"\\';
+        EnhancedSystemPrompt += '- "Sales Cr.Memo Header" table → use "SalesCreditMemo"\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += 'PURCHASE DOCUMENTS:\\';
+        EnhancedSystemPrompt += '- "Purchase Header" table → use "PurchaseOrder"\\';
+        EnhancedSystemPrompt += '- "Purch. Inv. Header" table → use "PurchaseInvoice"\\';
+        EnhancedSystemPrompt += '- "Purch. Rcpt. Header" table → use "PurchaseReceipt"\\';
+        EnhancedSystemPrompt += '- "Purch. Cr. Memo Hdr." table → use "PurchaseCreditMemo"\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += 'LEDGER ENTRIES:\\';
+        EnhancedSystemPrompt += '- "Cust. Ledger Entry" table → use "CustomerLedgerEntry"\\';
+        EnhancedSystemPrompt += '- "Vendor Ledger Entry" table → use "VendorLedgerEntry"\\';
+        EnhancedSystemPrompt += '- "Item Ledger Entry" table → use "ItemLedgerEntry"\\';
+        EnhancedSystemPrompt += '- "G/L Entry" table → use "GLEntry"\\';
+        EnhancedSystemPrompt += '- "Bank Account Ledger Entry" table → use "BankAccountLedgerEntry"\\';
+        EnhancedSystemPrompt += '- "Value Entry" table → use "ValueEntry"\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += 'CRITICAL: Always use these standardized names in your JSON response, NOT the BC table names.\\';
+        EnhancedSystemPrompt += 'Example: For customer transactions query, use "CustomerLedgerEntry", NOT "Cust. Ledger Entry".\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += '\\\\CRITICAL RESPONSE FORMAT:\\';
+        EnhancedSystemPrompt += '- You MUST return valid JSON in this exact format\\';
+        EnhancedSystemPrompt += '- RESPOND WITH JSON ONLY - NO MARKDOWN, NO CODE BLOCKS, NO EXPLANATIONS\\';
+        EnhancedSystemPrompt += '- Never wrap JSON in ```json or ```sql or any other formatting\\';
+        EnhancedSystemPrompt += '- Just return the raw JSON object starting with {\\';
+        EnhancedSystemPrompt += '- executionMode MUST be "native" for ALL queries\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += '\\\\GROUP BY QUERY SYNTAX:\\';
+        EnhancedSystemPrompt += '{"intent":"query","executionMode":"native","primaryEntity":"<entity>","groupBy":["<field>"],"aggregations":[{"function":"COUNT|SUM|AVG|MIN|MAX","field":"<field>","alias":"<name>"}],"sort":{"field":"<aggregation-alias>","direction":"DESC|ASC"},"top":N}\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += '\\\\' + GetSchemaContext();
+
+        exit(EnhancedSystemPrompt);
     end;
 }

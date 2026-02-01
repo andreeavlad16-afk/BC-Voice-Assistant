@@ -124,6 +124,36 @@ page 50613 "NXR Voice Command API"
 
         if not Success then
             ErrorMessage := 'Unable to process query';
+
+        // Sanitize response text for speech output
+        if Success then
+            ResponseText := SanitizeForSpeech(ResponseText);
+    end;
+
+    local procedure SanitizeForSpeech(InputText: Text): Text
+    var
+        CleanText: Text;
+    begin
+        CleanText := InputText;
+
+        // Remove literal backslash-n sequences
+        CleanText := CleanText.Replace('\n', ' ');
+        CleanText := CleanText.Replace('\r', ' ');
+        CleanText := CleanText.Replace('\t', ' ');
+
+        // Remove actual line breaks and tabs
+        CleanText := CleanText.Replace(Format(10), ' '); // Line Feed
+        CleanText := CleanText.Replace(Format(13), ' '); // Carriage Return
+        CleanText := CleanText.Replace(Format(9), ' ');  // Tab
+
+        // Remove multiple spaces
+        while CleanText.Contains('  ') do
+            CleanText := CleanText.Replace('  ', ' ');
+
+        // Trim
+        CleanText := CleanText.Trim();
+
+        exit(CleanText);
     end;
 
     local procedure GetJsonText(JObject: JsonObject; PropertyName: Text): Text
