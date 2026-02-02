@@ -451,21 +451,30 @@
 
         <div class="card config-panel" id="configPanel">
             <div class="config-group">
-                <label class="config-label">Function URL</label>
+                <label class="config-label">BC Environment URL</label>
                 <input 
                     type="text" 
-                    id="functionUrl" 
+                    id="bcUrl" 
                     class="config-input"
-                    placeholder="https://func-bcvoice-prod.azurewebsites.net"
+                    placeholder="https://api.businesscentral.dynamics.com/v2.0/[tenant]/[environment]"
                 >
             </div>
             <div class="config-group">
-                <label class="config-label">Function Key (Optional)</label>
+                <label class="config-label">BC Function Code</label>
                 <input 
                     type="password" 
-                    id="functionKey" 
+                    id="bcCode" 
                     class="config-input"
-                    placeholder="Leave empty for public access"
+                    placeholder="BC API function code from Voice Assistant Setup"
+                >
+            </div>
+            <div class="config-group">
+                <label class="config-label">Transcription URL (Azure Function)</label>
+                <input 
+                    type="text" 
+                    id="transcribeUrl" 
+                    class="config-input"
+                    placeholder="https://func-bcvoice-prod.azurewebsites.net/api/transcribe"
                 >
             </div>
             <button class="save-config-button" onclick="saveConfig()">💾 Save Settings</button>
@@ -475,8 +484,9 @@
     <script>
         // Configuration
         const DEFAULT_CONFIG = {
-            functionUrl: 'https://func-bcvoice-prod.azurewebsites.net',
-            functionKey: '' // Leave empty if not needed
+            bcUrl: 'https://api.businesscentral.dynamics.com/v2.0/60d3cd31-aac9-4a19-90f7-4cff0310f993/GB-Demonstration',
+            bcCode: '',
+            transcribeUrl: 'https://func-bcvoice-prod.azurewebsites.net/api/transcribe'
         };
 
         let config = { ...DEFAULT_CONFIG };
@@ -499,14 +509,16 @@
             if (saved) {
                 config = { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
             }
-            document.getElementById('functionUrl').value = config.functionUrl;
-            document.getElementById('functionKey').value = config.functionKey;
+            document.getElementById('bcUrl').value = config.bcUrl;
+            document.getElementById('bcCode').value = config.bcCode;
+            document.getElementById('transcribeUrl').value = config.transcribeUrl;
         }
 
         // Save configuration
         function saveConfig() {
-            config.functionUrl = document.getElementById('functionUrl').value.trim();
-            config.functionKey = document.getElementById('functionKey').value.trim();
+            config.bcUrl = document.getElementById('bcUrl').value.trim();
+            config.bcCode = document.getElementById('bcCode').value.trim();
+            config.transcribeUrl = document.getElementById('transcribeUrl').value.trim();
             localStorage.setItem('bcVoiceConfig', JSON.stringify(config));
             alert('✅ Settings saved!');
             toggleConfig();
@@ -567,16 +579,22 @@
                     } 
                 });
 
-                // Determine MIME type
+                // Determine MIME type with iOS Safari support
                 let mimeType = 'audio/webm';
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'audio/mp4'; // iOS Safari primary format
+                }
                 if (!MediaRecorder.isTypeSupported(mimeType)) {
                     mimeType = 'audio/ogg';
                 }
                 if (!MediaRecorder.isTypeSupported(mimeType)) {
                     mimeType = 'audio/wav';
                 }
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = ''; // Let browser choose
+                }
 
-                mediaRecorder = new MediaRecorder(stream, { mimeType });
+                mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
                 audioChunks = [];
 
                 mediaRecorder.ondataavailable = (event) => {
@@ -622,25 +640,44 @@
             showLoading(true);
 
             try {
-                const formData = new FormData();
-                formData.append('file', audioBlob, 'recording.webm');
+                // Step 1: Convert audio to base64
+                const arrayBuffer = await audioBlob.arrayBuffer();
+                const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
-                const headers = {};
-                if (config.functionKey) {
-                    headers['x-functions-key'] = config.functionKey;
-                }
-
-                const response = await fetch(`${config.functionUrl}/api/voiceQuery`, {
+                // Step 2: Call transcribe endpoint
+                const transcribeResponse = await fetch(config.transcribeUrl, {
                     method: 'POST',
-                    headers: headers,
-                    body: formData
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        audioData: base64Audio,
+                        mimeType: audioBlob.type
+                    })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                if (!transcribeResponse.ok) {
+                    throw new Error(`Transcription failed: ${transcribeResponse.status}`);
                 }
 
-                const result = await response.text();
+                const transcribeResult = await transcribeResponse.json();
+                const transcribedText = transcribeResult.text;
+
+                if (!transcribedText) {
+                    throw new Error('No transcription returned');
+                }
+
+                // Step 3: Send transcribed text to BC
+                const bcUrl = `${config.bcUrl}/api/hackathon/voiceAssistant/v1.0/voiceCommands?code=${config.bcCode}`;
+                const bcResponse = await fetch(bcUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ queryText: transcribedText })
+                });
+
+                if (!bcResponse.ok) {
+                    throw new Error(`BC API error: ${bcResponse.status}`);
+                }
+
+                const result = await bcResponse.text();
                 showResult(result, true);
                 statusText.textContent = 'Tap to start recording';
 
@@ -666,21 +703,15 @@
             sendButton.disabled = true;
 
             try {
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                if (config.functionKey) {
-                    headers['x-functions-key'] = config.functionKey;
-                }
-
-                const response = await fetch(`${config.functionUrl}/api/query`, {
+                const bcUrl = `${config.bcUrl}/api/hackathon/voiceAssistant/v1.0/voiceCommands?code=${config.bcCode}`;
+                const response = await fetch(bcUrl, {
                     method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({ query })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ queryText: query })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(`BC API error: ${response.status}: ${response.statusText}`);
                 }
 
                 const result = await response.text();
