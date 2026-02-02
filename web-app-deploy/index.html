@@ -579,16 +579,22 @@
                     } 
                 });
 
-                // Determine MIME type
+                // Determine MIME type with iOS Safari support
                 let mimeType = 'audio/webm';
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = 'audio/mp4'; // iOS Safari primary format
+                }
                 if (!MediaRecorder.isTypeSupported(mimeType)) {
                     mimeType = 'audio/ogg';
                 }
                 if (!MediaRecorder.isTypeSupported(mimeType)) {
                     mimeType = 'audio/wav';
                 }
+                if (!MediaRecorder.isTypeSupported(mimeType)) {
+                    mimeType = ''; // Let browser choose
+                }
 
-                mediaRecorder = new MediaRecorder(stream, { mimeType });
+                mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
                 audioChunks = [];
 
                 mediaRecorder.ondataavailable = (event) => {

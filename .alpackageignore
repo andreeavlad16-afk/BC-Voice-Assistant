@@ -1,0 +1,7 @@
+azure-relay/
+*.md
+*.txt
+*.log
+.vscode/
+.git/
+output/
