@@ -7,6 +7,16 @@
 [![Version](https://img.shields.io/badge/Version-2.2.0.21-brightgreen)](https://github.com/yourusername/BC-Voice-Assistant/releases)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+## 📹 See It In Action
+
+Watch a quick demo of the voice assistant in action:
+
+[![BC Voice Assistant Demo](https://img.youtube.com/vi/0lbKYgmdpVk/maxresdefault.jpg)](https://youtube.com/shorts/0lbKYgmdpVk?feature=share)
+
+*Click to watch the demo video*
+
+---
+
 ## 🏆 The Hackathon Challenge
 
 **Microsoft Directions EMEA 2025 Hackathon**  
