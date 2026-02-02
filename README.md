@@ -38,8 +38,8 @@ A complete voice-activated assistant system consisting of:
 
 - ✅ **Voice Input**: "Show me today's sales orders"
 - ✅ **Voice Output**: Hear responses read aloud
-- ✅ **Conversation History** (v2.1.9.0): AI remembers last 5 exchanges for contextual understanding
-- ✅ **AI-Generated Follow-Ups** (v2.1.9.0): Contextual question suggestions after each query
+- ✅ **Conversation History** : AI remembers last 5 exchanges for contextual understanding
+- ✅ **AI-Generated Follow-Ups** : Contextual question suggestions after each query
 - ✅ **BC-Native Mode**: Works without Azure (pattern matching)
 - ✅ **AI-Enhanced Mode**: Uses Azure OpenAI for complex queries
 - ✅ **Mobile Ready**: Custom control add-in for BC Mobile App
@@ -231,7 +231,7 @@ User Voice Input
 1. **Install the extension**
    ```powershell
    # Download the .app file from this repository:
-   # Nexer Enterprise Applications UK_NXR Voice Assistant_2.1.4.3.app
+   # Nexer Enterprise Applications UK_NXR Voice Assistant_2.2.0.37.app
    
    # In Business Central:
    # 1. Go to Extension Management
