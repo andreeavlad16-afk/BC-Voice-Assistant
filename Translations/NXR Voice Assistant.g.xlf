@@ -653,6 +653,16 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Setup API - Control transcriptionProxyURL - Property Caption</note>
         </trans-unit>
+        <trans-unit id="PageExtension 1917295053 - Action 1084542076 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 2050619786">
+          <source>Automatically publish all available pages as OData web services for voice assistant queries</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">PageExtension NXR Web Services Ext - Action PublishAllPages - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="PageExtension 1917295053 - Action 1084542076 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 2050619786">
+          <source>Publish All Pages</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">PageExtension NXR Web Services Ext - Action PublishAllPages - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Enum 1599674164 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>AI Backend Type</source>
           <note from="Developer" annotates="general" priority="2"></note>

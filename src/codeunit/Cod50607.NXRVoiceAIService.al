@@ -84,6 +84,12 @@ codeunit 50607 "NXR Voice AI Service"
         PromptText += 'System Response: ' + ResponseText + ' ';
         if StructuredData <> '' then
             PromptText += 'Query Structure: ' + StructuredData + ' ';
+        PromptText += 'FOLLOW-UP QUESTION GUIDELINES: ';
+        PromptText += '1. Each question should query a SINGLE table only (not multiple tables or joins). ';
+        PromptText += '2. Use specific values from the response (like order numbers, customer names, amounts) in your questions. ';
+        PromptText += '3. Example pattern: If response mentions "order SO-12345", suggest "What is the value of order SO-12345?" or "What is the status of order SO-12345?". ';
+        PromptText += '4. Focus on natural drill-down: from summary to details about specific records mentioned. ';
+        PromptText += '5. Prefer simple queries that reference specific IDs, names, or numbers already provided. ';
         PromptText += 'CRITICAL OUTPUT FORMAT: ';
         PromptText += '1. Start IMMEDIATELY with the text You might also ask (no leading characters, spaces, or line breaks). ';
         PromptText += '2. Then add a line break. ';
@@ -610,6 +616,15 @@ codeunit 50607 "NXR Voice AI Service"
         EnhancedSystemPrompt += '- NEVER use executionMode:"odata" - it will fail with authentication error\\';
         EnhancedSystemPrompt += '- Native mode queries BC tables directly using AL code - no HTTP, no OAuth needed\\';
         EnhancedSystemPrompt += '- All query types (list, filter, sort, count, top N) work in native mode\\';
+        EnhancedSystemPrompt += '\\';
+        EnhancedSystemPrompt += '\\\\CRITICAL: CONVERSATION CONTEXT HANDLING:\\';
+        EnhancedSystemPrompt += '- You have access to conversation history for context and follow-up understanding\\';
+        EnhancedSystemPrompt += '- Use history to understand pronouns (it, that, them) and implicit references\\';
+        EnhancedSystemPrompt += '- HOWEVER: When user asks about a NEW entity type, identify it from CURRENT query ONLY\\';
+        EnhancedSystemPrompt += '- Example: Previous="sales order 101004", Current="how many GL entries" → Answer uses GLEntry NOT SalesOrder\\';
+        EnhancedSystemPrompt += '- Example: Previous="show customers", Current="how many are there" → Answer uses Customer (same entity, legitimate follow-up)\\';
+        EnhancedSystemPrompt += '- If the current query mentions a new noun/entity, extract that entity - do not reuse previous entity type\\';
+        EnhancedSystemPrompt += '- The entity name mapping below shows ALL available entities - match query nouns to these names\\';
         EnhancedSystemPrompt += '\\';
         EnhancedSystemPrompt += '\\\\NATIVE MODE QUERY EXAMPLES (USE THESE):\\';
         EnhancedSystemPrompt += '- "how many customers": {"intent":"query","executionMode":"native","primaryEntity":"Customer","queryType":"count"}\\';

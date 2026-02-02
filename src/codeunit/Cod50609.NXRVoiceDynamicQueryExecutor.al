@@ -4,6 +4,14 @@
 /// </summary>
 codeunit 50609 "NXR Voice Dynamic Query Exec."
 {
+    var
+        NewLine: Char;
+
+    trigger OnRun()
+    begin
+        NewLine := 10; // Line feed character
+    end;
+
     // Dynamic query executor that handles linked entity queries
     // Supports Customer<->Item, Vendor<->Item relationships via transactional tables
 
@@ -490,6 +498,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
     local procedure GetTableNumber(EntityName: Text): Integer
     begin
         case EntityName of
+            // ========== MASTER DATA ==========
             'Customer':
                 exit(DATABASE::Customer);
             'Vendor':
@@ -500,24 +509,283 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
                 exit(DATABASE::Employee);
             'Location':
                 exit(DATABASE::Location);
+            'Contact':
+                exit(DATABASE::Contact);
+            'Resource':
+                exit(DATABASE::Resource);
+            'Salesperson', 'SalespersonPurchaser', 'Salesperson/Purchaser':
+                exit(DATABASE::"Salesperson/Purchaser");
+            'ResponsibilityCenter', 'Responsibility Center':
+                exit(DATABASE::"Responsibility Center");
+
+            // ========== SALES DOCUMENTS - OPEN ==========
             'SalesOrder', 'Sales Order', 'SalesHeader', 'Sales Header':
+                exit(DATABASE::"Sales Header");
+            'SalesQuote', 'Sales Quote':
+                exit(DATABASE::"Sales Header");
+            'SalesCreditMemo', 'Sales Credit Memo':
+                exit(DATABASE::"Sales Header");
+            'SalesReturnOrder', 'Sales Return Order':
                 exit(DATABASE::"Sales Header");
             'SalesLine', 'Sales Line':
                 exit(DATABASE::"Sales Line");
-            'SalesInvoice', 'Sales Invoice', 'SalesInvoiceHeader':
+            'SalesOrderArchive', 'Sales Header Archive':
+                exit(DATABASE::"Sales Header Archive");
+
+            // ========== SALES DOCUMENTS - POSTED ==========
+            'PostedSalesInvoice', 'Posted Sales Invoice', 'SalesInvoice', 'Sales Invoice', 'SalesInvoiceHeader', 'Sales Invoice Header':
                 exit(DATABASE::"Sales Invoice Header");
+            'PostedSalesInvoiceLine', 'Sales Invoice Line':
+                exit(DATABASE::"Sales Invoice Line");
+            'PostedSalesShipment', 'Sales Shipment', 'SalesShipmentHeader', 'Sales Shipment Header':
+                exit(DATABASE::"Sales Shipment Header");
+            'PostedSalesShipmentLine', 'Sales Shipment Line':
+                exit(DATABASE::"Sales Shipment Line");
+            'PostedSalesCreditMemo', 'Sales Cr.Memo Header':
+                exit(DATABASE::"Sales Cr.Memo Header");
+            'PostedSalesCreditMemoLine', 'Sales Cr.Memo Line':
+                exit(DATABASE::"Sales Cr.Memo Line");
+            'PostedReturnReceipt', 'Return Receipt Header':
+                exit(DATABASE::"Return Receipt Header");
+            'PostedReturnReceiptLine', 'Return Receipt Line':
+                exit(DATABASE::"Return Receipt Line");
+
+            // ========== PURCHASE DOCUMENTS - OPEN ==========
             'PurchaseOrder', 'Purchase Order', 'PurchaseHeader', 'Purchase Header':
+                exit(DATABASE::"Purchase Header");
+            'PurchaseQuote', 'Purchase Quote':
+                exit(DATABASE::"Purchase Header");
+            'PurchaseCreditMemo', 'Purchase Credit Memo':
+                exit(DATABASE::"Purchase Header");
+            'PurchaseReturnOrder', 'Purchase Return Order':
                 exit(DATABASE::"Purchase Header");
             'PurchaseLine', 'Purchase Line':
                 exit(DATABASE::"Purchase Line");
+            'PurchaseOrderArchive', 'Purchase Header Archive':
+                exit(DATABASE::"Purchase Header Archive");
+
+            // ========== PURCHASE DOCUMENTS - POSTED ==========
+            'PostedPurchaseInvoice', 'Posted Purchase Invoice', 'PurchaseInvoice', 'Purch. Inv. Header':
+                exit(DATABASE::"Purch. Inv. Header");
+            'PostedPurchaseInvoiceLine', 'Purch. Inv. Line':
+                exit(DATABASE::"Purch. Inv. Line");
+            'PostedPurchaseReceipt', 'Purchase Receipt', 'Purch. Rcpt. Header':
+                exit(DATABASE::"Purch. Rcpt. Header");
+            'PostedPurchaseReceiptLine', 'Purch. Rcpt. Line':
+                exit(DATABASE::"Purch. Rcpt. Line");
+            'PostedPurchaseCreditMemo', 'Purch. Cr. Memo Hdr.':
+                exit(DATABASE::"Purch. Cr. Memo Hdr.");
+            'PostedPurchaseCreditMemoLine', 'Purch. Cr. Memo Line':
+                exit(DATABASE::"Purch. Cr. Memo Line");
+            'PostedReturnShipment', 'Return Shipment Header':
+                exit(DATABASE::"Return Shipment Header");
+            'PostedReturnShipmentLine', 'Return Shipment Line':
+                exit(DATABASE::"Return Shipment Line");
+
+            // ========== FINANCIALS - G/L & GENERAL ==========
+            'GLAccount', 'G/L Account':
+                exit(DATABASE::"G/L Account");
+            'GLEntry', 'G/L Entry':
+                exit(DATABASE::"G/L Entry");
+            'GenJournalLine', 'Gen. Journal Line':
+                exit(DATABASE::"Gen. Journal Line");
+            'GenJournalBatch', 'Gen. Journal Batch':
+                exit(DATABASE::"Gen. Journal Batch");
+            'GenJournalTemplate', 'Gen. Journal Template':
+                exit(DATABASE::"Gen. Journal Template");
+
+            // ========== FINANCIALS - BANK ==========
             'BankAccount', 'Bank Account':
                 exit(DATABASE::"Bank Account");
+            'BankAccountLedgerEntry', 'Bank Account Ledger Entry':
+                exit(DATABASE::"Bank Account Ledger Entry");
+            'BankAccReconciliation', 'Bank Acc. Reconciliation':
+                exit(DATABASE::"Bank Acc. Reconciliation");
+            'BankAccReconciliationLine', 'Bank Acc. Reconciliation Line':
+                exit(DATABASE::"Bank Acc. Reconciliation Line");
+
+            // ========== FINANCIALS - CUSTOMER/VENDOR LEDGERS ==========
+            'CustomerLedgerEntry', 'Cust. Ledger Entry':
+                exit(DATABASE::"Cust. Ledger Entry");
+            'VendorLedgerEntry', 'Vendor Ledger Entry':
+                exit(DATABASE::"Vendor Ledger Entry");
+            'DetailedCustLedgEntry', 'Detailed Cust. Ledg. Entry':
+                exit(DATABASE::"Detailed Cust. Ledg. Entry");
+            'DetailedVendorLedgEntry', 'Detailed Vendor Ledg. Entry':
+                exit(DATABASE::"Detailed Vendor Ledg. Entry");
+
+            // ========== FINANCIALS - VAT & TAX ==========
+            'VATEntry', 'VAT Entry':
+                exit(DATABASE::"VAT Entry");
+            'VATPostingSetup', 'VAT Posting Setup':
+                exit(DATABASE::"VAT Posting Setup");
+
+            // ========== INVENTORY & WAREHOUSE ==========
+            'ItemLedgerEntry', 'Item Ledger Entry':
+                exit(DATABASE::"Item Ledger Entry");
+            'ValueEntry', 'Value Entry':
+                exit(DATABASE::"Value Entry");
+            'ItemCharge', 'Item Charge':
+                exit(DATABASE::"Item Charge");
+            'ItemChargeAssignment', 'Item Charge Assignment (Purch)', 'Item Charge Assignment (Sales)':
+                exit(DATABASE::"Item Charge Assignment (Purch)");
+            'TransferHeader', 'Transfer Header':
+                exit(DATABASE::"Transfer Header");
+            'TransferLine', 'Transfer Line':
+                exit(DATABASE::"Transfer Line");
+            'TransferShipmentHeader', 'Transfer Shipment Header':
+                exit(DATABASE::"Transfer Shipment Header");
+            'TransferShipmentLine', 'Transfer Shipment Line':
+                exit(DATABASE::"Transfer Shipment Line");
+            'TransferReceiptHeader', 'Transfer Receipt Header':
+                exit(DATABASE::"Transfer Receipt Header");
+            'TransferReceiptLine', 'Transfer Receipt Line':
+                exit(DATABASE::"Transfer Receipt Line");
+            'BinContent', 'Bin Content':
+                exit(DATABASE::"Bin Content");
+            'Bin':
+                exit(DATABASE::Bin);
+            'Zone':
+                exit(DATABASE::Zone);
+            'WarehouseEntry', 'Warehouse Entry':
+                exit(DATABASE::"Warehouse Entry");
+
+            // ========== MANUFACTURING ==========
+            'ProductionOrder', 'Production Order':
+                exit(DATABASE::"Production Order");
+            'ProdOrderLine', 'Prod. Order Line':
+                exit(DATABASE::"Prod. Order Line");
+            'ProdOrderComponent', 'Prod. Order Component':
+                exit(DATABASE::"Prod. Order Component");
+            'ProdOrderRoutingLine', 'Prod. Order Routing Line':
+                exit(DATABASE::"Prod. Order Routing Line");
+            'ProductionBOMHeader', 'Production BOM Header':
+                exit(DATABASE::"Production BOM Header");
+            'ProductionBOMLine', 'Production BOM Line':
+                exit(DATABASE::"Production BOM Line");
+            'RoutingHeader', 'Routing Header':
+                exit(DATABASE::"Routing Header");
+            'RoutingLine', 'Routing Line':
+                exit(DATABASE::"Routing Line");
+            'WorkCenter', 'Work Center':
+                exit(DATABASE::"Work Center");
+            'MachineCenter', 'Machine Center':
+                exit(DATABASE::"Machine Center");
+            'CapacityLedgerEntry', 'Capacity Ledger Entry':
+                exit(DATABASE::"Capacity Ledger Entry");
+
+            // ========== SERVICE MANAGEMENT ==========
+            'ServiceHeader', 'Service Header':
+                exit(DATABASE::"Service Header");
+            'ServiceLine', 'Service Line':
+                exit(DATABASE::"Service Line");
+            'ServiceItem', 'Service Item':
+                exit(DATABASE::"Service Item");
+            'ServiceItemLine', 'Service Item Line':
+                exit(DATABASE::"Service Item Line");
+            'ServiceContract', 'Service Contract Header':
+                exit(DATABASE::"Service Contract Header");
+            'ServiceContractLine', 'Service Contract Line':
+                exit(DATABASE::"Service Contract Line");
+            'ServiceInvoiceHeader', 'Service Invoice Header':
+                exit(DATABASE::"Service Invoice Header");
+            'ServiceInvoiceLine', 'Service Invoice Line':
+                exit(DATABASE::"Service Invoice Line");
+            'ServiceShipmentHeader', 'Service Shipment Header':
+                exit(DATABASE::"Service Shipment Header");
+            'ServiceShipmentLine', 'Service Shipment Line':
+                exit(DATABASE::"Service Shipment Line");
+            'ServiceCrMemoHeader', 'Service Cr.Memo Header':
+                exit(DATABASE::"Service Cr.Memo Header");
+            'ServiceCrMemoLine', 'Service Cr.Memo Line':
+                exit(DATABASE::"Service Cr.Memo Line");
+
+            // ========== JOBS & PROJECTS ==========
+            'Job':
+                exit(DATABASE::Job);
+            'JobTask', 'Job Task':
+                exit(DATABASE::"Job Task");
+            'JobLedgerEntry', 'Job Ledger Entry':
+                exit(DATABASE::"Job Ledger Entry");
+            'JobPlanningLine', 'Job Planning Line':
+                exit(DATABASE::"Job Planning Line");
+            'JobJournalLine', 'Job Journal Line':
+                exit(DATABASE::"Job Journal Line");
+
+            // ========== FIXED ASSETS ==========
+            'FixedAsset', 'Fixed Asset':
+                exit(DATABASE::"Fixed Asset");
+            'FALedgerEntry', 'FA Ledger Entry':
+                exit(DATABASE::"FA Ledger Entry");
+            'FADepreciationBook', 'FA Depreciation Book':
+                exit(DATABASE::"FA Depreciation Book");
+            'DepreciationBook', 'Depreciation Book':
+                exit(DATABASE::"Depreciation Book");
+            'FAClass', 'FA Class':
+                exit(DATABASE::"FA Class");
+            'FASubclass', 'FA Subclass':
+                exit(DATABASE::"FA Subclass");
+            'FALocation', 'FA Location':
+                exit(DATABASE::"FA Location");
+
+            // ========== CONFIGURATION & SETUP ==========
             'Dimension':
                 exit(DATABASE::Dimension);
             'DimensionValue', 'Dimension Value':
                 exit(DATABASE::"Dimension Value");
-            'G/L Entry', 'GLEntry':
-                exit(DATABASE::"G/L Entry");
+            'DefaultDimension', 'Default Dimension':
+                exit(DATABASE::"Default Dimension");
+            'PaymentTerms', 'Payment Terms':
+                exit(DATABASE::"Payment Terms");
+            'PaymentMethod', 'Payment Method':
+                exit(DATABASE::"Payment Method");
+            'ShipmentMethod', 'Shipment Method':
+                exit(DATABASE::"Shipment Method");
+            'ShippingAgent', 'Shipping Agent':
+                exit(DATABASE::"Shipping Agent");
+            'ShippingAgentService', 'Shipping Agent Services':
+                exit(DATABASE::"Shipping Agent Services");
+            'Currency':
+                exit(DATABASE::Currency);
+            'CurrencyExchangeRate', 'Currency Exchange Rate':
+                exit(DATABASE::"Currency Exchange Rate");
+            'CountryRegion', 'Country/Region':
+                exit(DATABASE::"Country/Region");
+            'UnitOfMeasure', 'Unit of Measure':
+                exit(DATABASE::"Unit of Measure");
+            'ItemCategory', 'Item Category':
+                exit(DATABASE::"Item Category");
+            'CustomerPriceGroup', 'Customer Price Group':
+                exit(DATABASE::"Customer Price Group");
+            'CustomerDiscountGroup', 'Customer Discount Group':
+                exit(DATABASE::"Customer Discount Group");
+            'CustomerPostingGroup', 'Customer Posting Group':
+                exit(DATABASE::"Customer Posting Group");
+            'VendorPostingGroup', 'Vendor Posting Group':
+                exit(DATABASE::"Vendor Posting Group");
+            'InventoryPostingGroup', 'Inventory Posting Group':
+                exit(DATABASE::"Inventory Posting Group");
+            'GenBusinessPostingGroup', 'Gen. Business Posting Group':
+                exit(DATABASE::"Gen. Business Posting Group");
+            'GenProductPostingGroup', 'Gen. Product Posting Group':
+                exit(DATABASE::"Gen. Product Posting Group");
+
+            // ========== HUMAN RESOURCES ==========
+            'EmployeeLedgerEntry', 'Employee Ledger Entry':
+                exit(DATABASE::"Employee Ledger Entry");
+
+            // ========== ADDITIONAL ENTITIES ==========
+            'ApprovalEntry', 'Approval Entry':
+                exit(DATABASE::"Approval Entry");
+            'UserSetup', 'User Setup':
+                exit(DATABASE::"User Setup");
+            'NoSeries', 'No. Series':
+                exit(DATABASE::"No. Series");
+            'NoSeriesLine', 'No. Series Line':
+                exit(DATABASE::"No. Series Line");
+            'ReportSelections', 'Report Selections':
+                exit(DATABASE::"Report Selections");
+
             else
                 exit(0);
         end;
@@ -534,6 +802,9 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         DebugJson: Text;
     begin
         RecRef.Open(TableNo);
+
+        // Apply Document Type filter for Sales Header entities
+        ApplyDocumentTypeFilter(RecRef, EntityName);
 
         // Check for count-only query
         QueryType := GetJsonText(QueryJson, 'queryType');
@@ -1185,7 +1456,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         i: Integer;
     begin
         ResponseText := StrSubstNo('Found %1 %2:', RecordCount, EntityName);
-        
+
         for i := 0 to RecordCount - 1 do begin
             if ResultArray.Get(i, RecordToken) then begin
                 if RecordToken.IsObject() then begin
@@ -1194,15 +1465,15 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
                     NameValue := GetJsonValueFromRecord(RecordObj, 'name');
                     if NameValue = '' then
                         NameValue := GetJsonValueFromRecord(RecordObj, 'description');
-                    
+
                     if NameValue <> '' then
-                        ResponseText += StrSubstNo('\n- %1 (%2)', NameValue, KeyValue)
+                        ResponseText += Format(NewLine) + StrSubstNo('%1, reference %2,', NameValue, KeyValue)
                     else
-                        ResponseText += StrSubstNo('\n- %1', KeyValue);
+                        ResponseText += Format(NewLine) + StrSubstNo('%1,', KeyValue);
                 end;
             end;
         end;
-        
+
         exit(ResponseText);
     end;
 
@@ -1258,6 +1529,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         SortDir: Text;
         FieldNo: Integer;
         FieldRef: FieldRef;
+        ViewString: Text;
     begin
         SortField := GetSortField(QueryJson);
         SortDir := GetSortDirection(QueryJson);
@@ -1270,12 +1542,19 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             FieldNo := GetFieldNumber(RecRef, SortField);
             if FieldNo <> 0 then begin
                 FieldRef := RecRef.Field(FieldNo);
-                
-                // Only apply SetView for Normal fields, not FlowFields
-                // FlowFields can't be used in SETCURRENTKEY/ORDER
-                if FieldRef.Class() = FieldClass::Normal then
-                    RecRef.SetView(StrSubstNo('SORTING(%1) ORDER(%2)', FieldRef.Name, UpperCase(SortDir)));
-                // For FlowFields, sorting will happen after data retrieval
+
+                // Only apply sorting for Normal fields, not FlowFields
+                // FlowFields can't be used in sorting operations
+                if FieldRef.Class() = FieldClass::Normal then begin
+                    // Build sorting view string for RecordRef
+                    ViewString := 'SORTING(' + SortField + ') ORDER(';
+                    if SortDir = 'DESC' then
+                        ViewString += 'Descending)'
+                    else
+                        ViewString += 'Ascending)';
+                    RecRef.SetView(ViewString);
+                end;
+                // For FlowFields, sorting is skipped to avoid errors
             end;
         end;
     end;
@@ -1283,20 +1562,132 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
     local procedure GetDefaultSortField(EntityName: Text): Text
     begin
         case EntityName of
+            // Master Data
             'Customer':
                 exit('Sales (LCY)');
             'Vendor':
                 exit('Balance (LCY)');
             'Item':
                 exit('Inventory');
+            'Employee':
+                exit('No.');
+            'Contact':
+                exit('No.');
+            'Resource':
+                exit('No.');
+
+            // Sales Documents
             'SalesOrder', 'Sales Order':
                 exit('Order Date');
-            'SalesInvoice', 'Sales Invoice':
+            'SalesQuote', 'Sales Quote':
+                exit('Quote Date');
+            'SalesInvoice', 'Sales Invoice', 'PostedSalesInvoice':
                 exit('Posting Date');
+            'PostedSalesShipment':
+                exit('Shipment Date');
+            'SalesCreditMemo':
+                exit('Posting Date');
+
+            // Purchase Documents
             'PurchaseOrder', 'Purchase Order':
                 exit('Order Date');
+            'PurchaseQuote', 'Purchase Quote':
+                exit('Quote Date');
+            'PostedPurchaseInvoice':
+                exit('Posting Date');
+            'PostedPurchaseReceipt':
+                exit('Posting Date');
+            'PurchaseCreditMemo':
+                exit('Posting Date');
+
+            // Ledger Entries
+            'GLEntry', 'G/L Entry':
+                exit('Posting Date');
+            'ItemLedgerEntry', 'Item Ledger Entry':
+                exit('Posting Date');
+            'CustomerLedgerEntry', 'Cust. Ledger Entry':
+                exit('Posting Date');
+            'VendorLedgerEntry', 'Vendor Ledger Entry':
+                exit('Posting Date');
+            'BankAccountLedgerEntry':
+                exit('Posting Date');
+            'FALedgerEntry', 'FA Ledger Entry':
+                exit('Posting Date');
+            'ValueEntry', 'Value Entry':
+                exit('Posting Date');
+            'CapacityLedgerEntry':
+                exit('Posting Date');
+            'JobLedgerEntry', 'Job Ledger Entry':
+                exit('Posting Date');
+            'EmployeeLedgerEntry':
+                exit('Posting Date');
+
+            // Manufacturing
+            'ProductionOrder', 'Production Order':
+                exit('Starting Date');
+
+            // Service
+            'ServiceHeader':
+                exit('Order Date');
+            'ServiceInvoiceHeader':
+                exit('Posting Date');
+
+            // Transfers
+            'TransferHeader':
+                exit('Posting Date');
+            'TransferShipmentHeader':
+                exit('Posting Date');
+
             else
                 exit('');
+        end;
+    end;
+
+    local procedure ApplyDocumentTypeFilter(var RecRef: RecordRef; EntityName: Text)
+    var
+        FieldRef: FieldRef;
+        FieldNo: Integer;
+        SalesHeader: Record "Sales Header";
+        PurchaseHeader: Record "Purchase Header";
+    begin
+        // Apply Document Type filter for Sales Header table
+        if RecRef.Number = DATABASE::"Sales Header" then begin
+            FieldNo := GetFieldNumber(RecRef, 'Document Type');
+            if FieldNo <> 0 then begin
+                FieldRef := RecRef.Field(FieldNo);
+                case EntityName of
+                    'SalesOrder', 'Sales Order':
+                        FieldRef.SetRange(SalesHeader."Document Type"::Order);
+                    'SalesQuote', 'Sales Quote':
+                        FieldRef.SetRange(SalesHeader."Document Type"::Quote);
+                    'SalesInvoice', 'Sales Invoice':
+                        FieldRef.SetRange(SalesHeader."Document Type"::Invoice);
+                    'SalesCreditMemo':
+                        FieldRef.SetRange(SalesHeader."Document Type"::"Credit Memo");
+                    'SalesReturnOrder':
+                        FieldRef.SetRange(SalesHeader."Document Type"::"Return Order");
+                end;
+            end;
+        end;
+
+        // Apply Document Type filter for Purchase Header table
+        if RecRef.Number = DATABASE::"Purchase Header" then begin
+            FieldNo := GetFieldNumber(RecRef, 'Document Type');
+            if FieldNo <> 0 then begin
+                FieldRef := RecRef.Field(FieldNo);
+                case EntityName of
+                    'PurchaseOrder', 'Purchase Order':
+                        FieldRef.SetRange(PurchaseHeader."Document Type"::Order);
+                    'PurchaseQuote', 'Purchase Quote':
+                        FieldRef.SetRange(PurchaseHeader."Document Type"::Quote);
+                    'PurchaseInvoice', 'Purchase Invoice':
+                        FieldRef.SetRange(PurchaseHeader."Document Type"::Invoice);
+                    'PurchaseCreditMemo':
+                        FieldRef.SetRange(PurchaseHeader."Document Type"::"Credit Memo");
+                    'PurchaseReturnOrder':
+                        FieldRef.SetRange(PurchaseHeader."Document Type"::"Return Order");
+                end;
+            end;
         end;
     end;
 
@@ -1332,7 +1723,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         for i := 1 to RecRef.FieldCount() do begin
             FieldRef := RecRef.FieldIndex(i);
             FieldClass := FieldRef.Class();
-            
+
             // Include Normal and FlowField, skip FlowFilter and BLOB
             if FieldClass in [FieldClass::Normal, FieldClass::FlowField] then begin
                 if FieldRef.Type() <> FieldType::BLOB then begin
@@ -1494,8 +1885,8 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             RecordCount := Customer.Count();
             ResultData.Add('count', RecordCount);
             if Setup.Get() and Setup."Debug Mode" then
-                ResponseText := DebugInfo + '\\\\Count query detected\\';
-            ResponseText += StrSubstNo('\\There are %1 customers in the database.', RecordCount);
+                ResponseText := DebugInfo + Format(NewLine) + 'Count query detected' + Format(NewLine);
+            ResponseText += StrSubstNo('There are %1 customers in the database.', RecordCount);
             exit(true);
         end;
 
@@ -1571,15 +1962,15 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             ResponseText := DebugInfo;
 
         if RecordCount = 1 then
-            ResponseText += StrSubstNo('\\Found 1 customer: %1.', GetFirstCustomerName(ResultArray))
+            ResponseText += Format(NewLine) + StrSubstNo('Found 1 customer: %1.', GetFirstCustomerName(ResultArray))
         else begin
             // Show what the results are sorted by for clarity
             if (SortField = 'Sales (LCY)') or (SortField = 'sales') then
-                ResponseText += StrSubstNo('\\Here are your top %1 customers by sales. Total sales: %2. Top: %3.', RecordCount, Format(TotalSales, 0, '<Precision,2:2><Standard Format,0>'), GetTopCustomerNames(ResultArray, 3))
+                ResponseText += Format(NewLine) + StrSubstNo('Here are your top %1 customers by sales. Total sales: %2. Top: %3.', RecordCount, Format(TotalSales, 0, '<Precision,2:2><Standard Format,0>'), GetTopCustomerNames(ResultArray, 3))
             else if (SortField = 'Balance (LCY)') or (SortField = 'balance') then
-                ResponseText += StrSubstNo('\\Here are your top %1 customers by balance. Total balance: %2. Top: %3.', RecordCount, Format(TotalBalance, 0, '<Precision,2:2><Standard Format,0>'), GetTopCustomerNames(ResultArray, 3))
+                ResponseText += Format(NewLine) + StrSubstNo('Here are your top %1 customers by balance. Total balance: %2. Top: %3.', RecordCount, Format(TotalBalance, 0, '<Precision,2:2><Standard Format,0>'), GetTopCustomerNames(ResultArray, 3))
             else
-                ResponseText += StrSubstNo('\\Found %1 customers. Total sales: %2, balance: %3.', RecordCount, Format(TotalSales, 0, '<Precision,2:2><Standard Format,0>'), Format(TotalBalance, 0, '<Precision,2:2><Standard Format,0>'))
+                ResponseText += Format(NewLine) + StrSubstNo('Found %1 customers. Total sales: %2, balance: %3.', RecordCount, Format(TotalSales, 0, '<Precision,2:2><Standard Format,0>'), Format(TotalBalance, 0, '<Precision,2:2><Standard Format,0>'))
         end;
 
         exit(true);
@@ -1669,11 +2060,11 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             ResponseText := DebugInfo;
 
         if RecordCount = 1 then
-            ResponseText += StrSubstNo('\\Found 1 item: %1.', GetFirstItemDescription(ResultArray))
+            ResponseText += Format(NewLine) + StrSubstNo('Found 1 item: %1.', GetFirstItemDescription(ResultArray))
         else if LowStockCount > 0 then
-            ResponseText += StrSubstNo('\\Found %1 items. %2 items are below reorder point.', RecordCount, LowStockCount)
+            ResponseText += Format(NewLine) + StrSubstNo('Found %1 items. %2 items are below reorder point.', RecordCount, LowStockCount)
         else
-            ResponseText += StrSubstNo('\\Found %1 items.', RecordCount);
+            ResponseText += Format(NewLine) + StrSubstNo('Found %1 items.', RecordCount);
 
         exit(true);
     end;
@@ -2675,7 +3066,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         // Try to check if sort field is a FlowField
         if not TryCheckIfFlowField(TableNo, SortField, IsFlowField) then
             exit; // Can't determine field type, skip post-sort
-        
+
         if not IsFlowField then
             exit; // Normal field, already sorted by SetView
 
@@ -2731,7 +3122,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
             if Token.IsObject() then begin
                 RecordObj := Token.AsObject();
                 RecordList.Add(RecordObj);
-                
+
                 // Try to get numeric value for sorting
                 if not Evaluate(FieldValue, GetJsonText(RecordObj, FieldName)) then
                     FieldValue := 0;
@@ -2743,7 +3134,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         for i := 1 to ValueList.Count() - 1 do begin
             MinIdx := i;
             MinValue := ValueList.Get(i);
-            
+
             for j := i + 1 to ValueList.Count() do begin
                 TempValue := ValueList.Get(j);
                 if ((Direction = 'DESC') and (TempValue > MinValue)) or
@@ -2752,13 +3143,13 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
                     MinValue := TempValue;
                 end;
             end;
-            
+
             if MinIdx <> i then begin
                 // Swap in value list
                 TempValue := ValueList.Get(i);
                 ValueList.Set(i, ValueList.Get(MinIdx));
                 ValueList.Set(MinIdx, TempValue);
-                
+
                 // Swap in record list
                 TempRecord := RecordList.Get(i);
                 RecordList.Set(i, RecordList.Get(MinIdx));
@@ -2770,7 +3161,7 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         Clear(SortedArray);
         foreach RecordObj in RecordList do
             SortedArray.Add(RecordObj);
-        
+
         ResultArray := SortedArray;
     end;
 }

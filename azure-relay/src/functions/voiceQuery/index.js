@@ -31,7 +31,11 @@ async function callBCVoiceAPI(queryText, functionKey) {
 
 module.exports = async function (context, invocationContext) {
     try {
-        // Parse SignalR invocation
+        // Parse SignalR invocation with null checks
+        if (!invocationContext || !invocationContext.arguments || invocationContext.arguments.length === 0) {
+            throw new Error('Invalid invocation context - missing arguments');
+        }
+        
         const { connectionId, arguments: args } = invocationContext;
         const queryText = args[0];
         const requestId = args[1] || Date.now().toString();

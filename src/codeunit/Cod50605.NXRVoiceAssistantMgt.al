@@ -4,6 +4,14 @@
 /// </summary>
 codeunit 50605 "NXR Voice Assistant Mgt."
 {
+    var
+        NewLine: Char;
+
+    trigger OnRun()
+    begin
+        NewLine := 10; // Line feed character
+    end;
+
     /// <summary>
     /// Processes a natural language query with conversation history and returns a formatted response with follow-up suggestions.
     /// </summary>
@@ -21,14 +29,14 @@ codeunit 50605 "NXR Voice Assistant Mgt."
     begin
         // First get the main response using existing logic with history
         ResponseText := ProcessQueryWithHistoryInternal(QueryText, ConversationHistory, BackendUrl, BCBaseUrl, Intent);
-        
+
         // Generate follow-up suggestions based on the query and result
         FollowUpText := AIService.GenerateFollowUpSuggestions(QueryText, ResponseText, Intent."Structured Data", ConversationHistory);
-        
+
         // Append follow-ups if generated
         if FollowUpText <> '' then
-            ResponseText += '\n\n' + FollowUpText;
-            
+            ResponseText += '...' + Format(NewLine) + Format(NewLine) + FollowUpText;
+
         exit(ResponseText);
     end;
 
@@ -56,7 +64,7 @@ codeunit 50605 "NXR Voice Assistant Mgt."
             if Intent."Structured Data" <> '' then begin
                 if StructuredQueryJson.ReadFrom(Intent."Structured Data") then begin
                     if DebugInfo <> '' then
-                        DebugInfo += '\\n[DEBUG] AI Structured Data: ' + Intent."Structured Data";
+                        DebugInfo += Format(NewLine) + '[DEBUG] AI Structured Data: ' + Intent."Structured Data";
                     // Check execution mode and route appropriately
                     if StructuredQueryJson.Get('executionMode', ExecutionModeToken) then
                         ExecutionMode := ExecutionModeToken.AsValue().AsText();
@@ -107,12 +115,12 @@ codeunit 50605 "NXR Voice Assistant Mgt."
             end;
             // AI parsed but no structured data
             if DebugInfo <> '' then
-                DebugInfo += '\\n[DEBUG] AI returned no structured data';
+                DebugInfo += Format(NewLine) + '[DEBUG] AI returned no structured data';
 
             // Check if fallback to pattern matching is enabled
             if Setup.Get() and Setup."Fallback to Pattern Matching" then begin
                 if DebugInfo <> '' then
-                    DebugInfo += '\\n[DEBUG] Falling back to pattern matching';
+                    DebugInfo += Format(NewLine) + '[DEBUG] Falling back to pattern matching';
                 exit(ExecuteQueryAndFormatResponse(Intent, QueryText));
             end else
                 exit(ApplyDebug('I couldn''t analyze that query. The AI didn''t return structured data.', DebugInfo));
@@ -124,7 +132,7 @@ codeunit 50605 "NXR Voice Assistant Mgt."
 
         // Fallback to pattern matching
         if DebugInfo <> '' then
-            DebugInfo += '\\n[DEBUG] Using pattern matching (AI not available)';
+            DebugInfo += Format(NewLine) + '[DEBUG] Using pattern matching (AI not available)';
 
         if not AnalyzeQueryIntent(QueryText, Intent) then
             exit(ApplyDebug('I didn''t understand that query. Try asking about customers, sales orders, or items.', DebugInfo));
@@ -151,7 +159,7 @@ codeunit 50605 "NXR Voice Assistant Mgt."
     local procedure ApplyDebug(ResponseText: Text; DebugInfo: Text): Text
     begin
         if DebugInfo <> '' then
-            exit(DebugInfo + '\\n' + ResponseText);
+            exit(DebugInfo + Format(NewLine) + ResponseText);
         exit(ResponseText);
     end;
 
@@ -255,7 +263,7 @@ codeunit 50605 "NXR Voice Assistant Mgt."
         RecordNo: Text;
     begin
         if Setup.Get() and Setup."Debug Mode" then
-            DebugPrefix := '[DEBUG] FormatResponse called - RecordCount=' + Format(RecordCount) + ', Entity=' + Format(Intent.Entity) + ', TopN=' + Format(Intent."Top N") + '\\\n';
+            DebugPrefix := '[DEBUG] FormatResponse called - RecordCount=' + Format(RecordCount) + ', Entity=' + Format(Intent.Entity) + ', TopN=' + Format(Intent."Top N") + Format(NewLine);
         if RecordCount = 0 then
             exit(DebugPrefix + 'I couldn''t find any matching records.');
 
