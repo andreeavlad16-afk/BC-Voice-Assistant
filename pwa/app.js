@@ -330,15 +330,6 @@ async function handleUserQuery(queryText) {
 // ============================================================================
 // UI HELPERS
 // ============================================================================
-/**
- * Safely escapes HTML to prevent XSS attacks
- */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 function addMessage(type, text) {
     const conversation = document.getElementById('conversation');
     const messageDiv = document.createElement('div');
