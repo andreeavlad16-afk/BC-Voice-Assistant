@@ -89,12 +89,31 @@ module.exports = async function (context, req) {
         if (!response.ok) {
             const errorText = await response.text();
             context.log(`❌ Whisper API error (${response.status}): ${errorText}`);
+            
+            // Provide more helpful error messages
+            let errorMessage = 'Transcription failed';
+            let errorDetails = errorText;
+            
+            if (response.status === 503) {
+                errorMessage = 'Service temporarily unavailable';
+                errorDetails = 'The transcription service is currently unavailable. This may be due to a cold start or high demand. Please try again in a moment.';
+            } else if (response.status === 401 || response.status === 403) {
+                errorMessage = 'Authentication failed';
+                errorDetails = 'Invalid or missing API key. Please check your Azure OpenAI configuration.';
+            } else if (response.status === 429) {
+                errorMessage = 'Rate limit exceeded';
+                errorDetails = 'Too many requests. Please wait a moment and try again.';
+            } else if (response.status === 404) {
+                errorMessage = 'Endpoint not found';
+                errorDetails = 'The Whisper API endpoint is not configured correctly. Please verify your Azure OpenAI deployment.';
+            }
+            
             context.res = {
                 status: response.status,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    error: 'Transcription failed',
-                    details: errorText,
+                    error: errorMessage,
+                    details: errorDetails,
                     statusCode: response.status,
                     apiUrl: apiUrl.replace(/api-key=[^&]*/, 'api-key=***')
                 })

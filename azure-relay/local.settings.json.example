@@ -1,6 +1,6 @@
 {
     "Host": {
-        "CORS": "*",
+        "CORS": "https://businesscentral.dynamics.com,https://*.dynamics.com,http://localhost:*,https://localhost:*",
         "CORSCredentials": true
     },
     "IsEncrypted": false,
