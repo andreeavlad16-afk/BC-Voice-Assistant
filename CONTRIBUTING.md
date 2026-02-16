@@ -208,6 +208,88 @@ resource voiceFunction 'Microsoft.Web/sites@2023-01-01' = {
 }
 ```
 
+## 🧪 Testing
+
+We use Playwright for end-to-end UI testing. All contributions should include tests when applicable.
+
+### Running Tests
+
+```bash
+# Install Playwright (first time only)
+npm init playwright@latest
+
+# Run all tests
+npx playwright test
+
+# Run tests in headed mode (see browser)
+npx playwright test --headed
+
+# Run specific test file
+npx playwright test tests/pwa/auth.spec.ts
+
+# Debug tests
+npx playwright test --debug
+
+# Generate tests by recording
+npx playwright codegen http://localhost:3000
+```
+
+### Writing Tests
+
+See [PLAYWRIGHT-TESTING-GUIDE.md](PLAYWRIGHT-TESTING-GUIDE.md) for comprehensive testing guidelines.
+
+**Quick Example:**
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('should display voice assistant interface', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('text=Voice Assistant')).toBeVisible();
+});
+```
+
+### Test Requirements
+
+When submitting a pull request:
+
+1. **PWA Changes**: Include tests for:
+   - Critical user flows (auth, voice input, queries)
+   - Offline mode behavior
+   - Mobile device compatibility
+
+2. **BC Extension Changes**: Include tests for:
+   - New pages or codeunits
+   - Query processing logic
+   - Setup and configuration
+
+3. **Azure Functions**: Include tests for:
+   - API endpoints
+   - Error handling
+   - Input validation
+
+4. **Test Coverage**: Aim for:
+   - 100% of critical paths
+   - 80% overall coverage for UI components
+   - 100% of API endpoints
+
+### VS Code Playwright Extension
+
+Install the [Playwright Test for VSCode](https://marketplace.visualstudio.com/items?itemName=ms-playwright.playwright) extension:
+
+1. Open VS Code Extensions (Ctrl/Cmd+Shift+X)
+2. Search for "Playwright Test for VSCode"
+3. Install the extension
+4. Open Testing panel (flask icon in sidebar)
+5. Click "Record new test" to generate tests interactively
+
+### CI/CD Testing
+
+All PRs automatically run Playwright tests via GitHub Actions:
+- Tests run on Chrome, Firefox, and Safari
+- Mobile device emulation (iOS/Android)
+- Screenshots/videos captured on failures
+- Test reports published as artifacts
+
 ## 🎯 Contribution Focus Areas
 
 We especially welcome contributions in these areas:

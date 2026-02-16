@@ -410,10 +410,19 @@ page 50608 "NXR Voice Assistant"
         MessageObj.Add('role', Role);
         MessageObj.Add('content', Content);
         ConversationHistory.Add(MessageObj);
-        
-        // Keep only last 10 messages (5 exchanges) to avoid token limits
-        if ConversationHistory.Count() > 10 then
+
+        // Keep only configured number of messages to avoid token limits
+        if ConversationHistory.Count() > GetMaxHistorySize() then
             ConversationHistory.RemoveAt(0);
+    end;
+
+    local procedure GetMaxHistorySize(): Integer
+    var
+        Setup: Record "NXR Voice Assistant Setup";
+    begin
+        if Setup.Get() then
+            exit(Setup."Conversation History Size");
+        exit(10); // Default fallback
     end;
 
     local procedure LoadConfiguration()

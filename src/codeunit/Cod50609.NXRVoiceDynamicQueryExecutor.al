@@ -1220,9 +1220,9 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
         if ValueList.Count() <= 1 then
             exit;
 
-        for i := 0 to ValueList.Count() - 2 do begin
+        for i := 1 to ValueList.Count() - 1 do begin
             Swapped := false;
-            for j := 0 to ValueList.Count() - i - 2 do begin
+            for j := 1 to ValueList.Count() - i do begin
                 ValueList.Get(j, Value1);
                 ValueList.Get(j + 1, Value2);
 
@@ -1516,11 +1516,40 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
                     FieldNo := GetFieldNumber(RecRef, FieldName);
                     if FieldNo <> 0 then begin
                         FieldRef := RecRef.Field(FieldNo);
+                        // Clean alphanumeric values for Code/Text fields
+                        // Remove commas, spaces from customer numbers, item numbers, etc.
+                        if FieldRef.Type in [FieldType::Code, FieldType::Text] then
+                            FieldValue := CleanAlphanumericValue(FieldValue);
                         FieldRef.SetFilter(FieldValue);
                     end;
                 end;
             end;
         end;
+    end;
+
+    local procedure CleanAlphanumericValue(InputValue: Text): Text
+    var
+        CleanValue: Text;
+        i: Integer;
+        Char: Char;
+    begin
+        // Strip thousand separators and formatting from alphanumeric codes
+        // "10,000" → "10000" (comma separator - US/UK)
+        // "10.000" → "10000" (period separator - European)
+        // "10 000" → "10000" (space separator - French/Swedish)
+        // "10'000" → "10000" (apostrophe separator - Swiss)
+        // "10_000" → "10000" (underscore separator)
+        // "101 004" → "101004"
+        // Preserves hyphens and other valid Code field characters
+        CleanValue := '';
+        for i := 1 to StrLen(InputValue) do begin
+            Char := InputValue[i];
+            // Strip: comma, space, period, apostrophe, underscore
+            // These are common thousand separators that don't belong in Code fields
+            if not (Char in [',', ' ', '.', '''', '_']) then
+                CleanValue += Format(Char);
+        end;
+        exit(CleanValue);
     end;
 
     local procedure ApplyGenericSorting(QueryJson: JsonObject; var RecRef: RecordRef; EntityName: Text)
@@ -2633,6 +2662,9 @@ codeunit 50609 "NXR Voice Dynamic Query Exec."
                 FilterValue := GetJsonText(FilterObj, 'value');
 
                 case FieldName of
+                    'No.':
+                        // Clean customer number: "10,000" → "10000"
+                        Customer.SetFilter("No.", CleanAlphanumericValue(FilterValue));
                     'City':
                         Customer.SetFilter(City, '@*' + FilterValue + '*');
                     'Balance (LCY)':

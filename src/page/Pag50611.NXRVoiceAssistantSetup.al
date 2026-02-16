@@ -239,6 +239,12 @@ page 50611 "NXR Voice Assistant Setup"
             {
                 Caption = 'Debug & Troubleshooting';
 
+                field("Conversation History Size"; Rec."Conversation History Size")
+                {
+                    ApplicationArea = All;
+                    ToolTip = 'Number of previous messages to include as context (0-50, default: 10). Higher values provide more context but consume more tokens.';
+                }
+
                 field("Debug Mode"; Rec."Debug Mode")
                 {
                     ApplicationArea = All;

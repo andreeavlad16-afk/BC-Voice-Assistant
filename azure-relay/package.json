@@ -2,7 +2,7 @@
   "name": "bc-voice-signalr-relay",
   "version": "1.0.0",
   "description": "Real-time SignalR relay for BC Voice Assistant",
-  "main": "functions/*.js",
+  "main": "src/index.js",
   "scripts": {
     "start": "func start",
     "deploy": "func azure functionapp publish YOUR_FUNCTION_APP_NAME"

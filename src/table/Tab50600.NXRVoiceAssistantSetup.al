@@ -124,6 +124,16 @@ table 50600 "NXR Voice Assistant Setup"
             DataClassification = CustomerContent;
             Editable = false;
         }
+
+        field(150; "Conversation History Size"; Integer)
+        {
+            Caption = 'Conversation History Size';
+            ToolTip = 'Number of previous messages to include as context (default: 10)';
+            DataClassification = SystemMetadata;
+            InitValue = 10;
+            MinValue = 0;
+            MaxValue = 50;
+        }
     }
 
     keys

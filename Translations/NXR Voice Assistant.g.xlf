@@ -63,6 +63,16 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field BC OData Base URL - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 516428894 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Number of previous messages to include as context (default: 10)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Conversation History Size - Property ToolTip</note>
+        </trans-unit>
+        <trans-unit id="Table 1996928243 - Field 516428894 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Conversation History Size</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table NXR Voice Assistant Setup - Field Conversation History Size - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Table 1996928243 - Field 3714772726 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
           <source>Show debug messages during query execution (for troubleshooting)</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -407,6 +417,11 @@
           <source>Debug &amp; Troubleshooting</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control DebugSettings - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1996928243 - Control 516428894 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Number of previous messages to include as context (0-50, default: 10). Higher values provide more context but consume more tokens.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page NXR Voice Assistant Setup - Control Conversation History Size - Property ToolTip</note>
         </trans-unit>
         <trans-unit id="Page 1996928243 - Control 3714772726 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
           <source>Enable to show debug messages during query execution (useful for troubleshooting AI query interpretation)</source>

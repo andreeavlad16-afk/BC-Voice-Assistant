@@ -451,12 +451,12 @@
 
         <div class="card config-panel" id="configPanel">
             <div class="config-group">
-                <label class="config-label">BC Environment URL</label>
+                <label class="config-label">BC Environment URL (no trailing slash)</label>
                 <input 
                     type="text" 
                     id="bcUrl" 
                     class="config-input"
-                    placeholder="https://api.businesscentral.dynamics.com/v2.0/[tenant]/[environment]"
+                    placeholder="https://businesscentral.dynamics.com/[tenant-id]/[environment]"
                 >
             </div>
             <div class="config-group">
@@ -666,7 +666,8 @@
                 }
 
                 // Step 3: Send transcribed text to BC
-                const bcUrl = `${config.bcUrl}/api/hackathon/voiceAssistant/v1.0/voiceCommands?code=${config.bcCode}`;
+                const normalizedBcUrl = config.bcUrl.replace(/\/+$/, '');
+                const bcUrl = `${normalizedBcUrl}/api/hackathon/voiceAssistant/v1.0/voiceCommands?code=${config.bcCode}`;
                 const bcResponse = await fetch(bcUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -703,7 +704,8 @@
             sendButton.disabled = true;
 
             try {
-                const bcUrl = `${config.bcUrl}/api/hackathon/voiceAssistant/v1.0/voiceCommands?code=${config.bcCode}`;
+                const normalizedBcUrl = config.bcUrl.replace(/\/+$/, '');
+                const bcUrl = `${normalizedBcUrl}/api/hackathon/voiceAssistant/v1.0/voiceCommands?code=${config.bcCode}`;
                 const response = await fetch(bcUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

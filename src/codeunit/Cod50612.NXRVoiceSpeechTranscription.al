@@ -62,6 +62,9 @@ codeunit 50612 "NXR Voice Speech Transcription"
         RequestJson.Add('mimeType', MimeType);
         RequestJson.WriteTo(RequestText);
 
+        // Log audio size for troubleshooting
+        Message('Audio size: %1 KB, MIME: %2', StrLen(Base64Audio) / 1024, MimeType);
+
         RequestContent.WriteFrom(RequestText);
         RequestContent.GetHeaders(ContentHeaders);
         ContentHeaders.Clear();
@@ -69,18 +72,22 @@ codeunit 50612 "NXR Voice Speech Transcription"
 
         Client.Timeout(60000); // 60 seconds for audio processing
 
-        if not Client.Post(TranscriptionProxyUrl, RequestContent, Response) then
+        Message('Sending to: %1', TranscriptionProxyUrl);
+
+        if not Client.Post(TranscriptionProxyUrl, RequestContent, Response) then begin
+            Message('Client.Post returned FALSE - connection failed');
             exit('Failed to connect to transcription proxy');
+        end;
+
+        Message('Got response with status: %1', Response.HttpStatusCode());
 
         if not Response.IsSuccessStatusCode() then begin
             Response.Content().ReadAs(ResponseText);
-            exit('Transcription failed: ' + ResponseText);
+            Message('HTTP Error %1: %2', Response.HttpStatusCode(), ResponseText);
+            exit('Transcription failed - check error message');
         end;
 
         Response.Content().ReadAs(ResponseText);
-
-        // DEBUG: Log the exact response for troubleshooting
-        Message('DEBUG Response: [%1]', ResponseText);
 
         if not ResponseJson.ReadFrom(ResponseText) then begin
             Message('JSON Parse failed for: %1', ResponseText);

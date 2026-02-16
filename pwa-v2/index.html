@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0078d4">
+    <meta name="description" content="Voice Assistant for Business Central">
+    <title>BC Voice Assistant v2.2.6</title>
+    <meta name="version" content="2.2.6">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <h1>🎤 BC Voice Assistant <span style="font-size:0.7em;color:#fff;background:#0078d4;padding:2px 8px;border-radius:8px;margin-left:8px;">v2.2.6</span></h1>
+            <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
+        </header>
+
+        <!-- Settings Panel -->
+        <div id="settingsPanel" class="settings-panel hidden">
+            <h2>Connection Settings</h2>
+            <div class="form-group">
+                <label for="relayUrl">Relay Function URL</label>
+                <input type="url" id="relayUrl" placeholder="https://func-bcvoice-v2.azurewebsites.net/api/voicerelay">
+            </div>
+            <div class="button-group">
+                <button id="saveSettingsBtn" class="btn btn-primary">Save</button>
+                <button id="cancelSettingsBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+            <div id="settingsStatus" class="settings-status"></div>
+        </div>
+
+        <!-- Status indicator -->
+        <div id="status" class="status-indicator">
+            <span class="status-dot"></span>
+            <span class="status-text">Tap microphone to start</span>
+        </div>
+
+        <!-- Conversation -->
+        <main id="conversation" class="conversation">
+            <div class="msg system">
+                <p>Welcome! Tap the microphone or type a question about your Business Central data.</p>
+                <p class="hint">Try: "How many customers do we have?" or "Show me top 5 sales orders"</p>
+            </div>
+        </main>
+
+        <!-- Input Area -->
+        <footer class="footer">
+            <div class="input-row">
+                <input type="text" id="textInput" placeholder="Type a question..." autocomplete="off">
+                <button id="sendBtn" class="icon-btn send-btn" aria-label="Send" title="Send">➤</button>
+                <button id="micBtn" class="mic-btn" aria-label="Record" title="Record">🎤</button>
+            </div>
+        </footer>
+
+        <!-- Recording Overlay -->
+        <div id="recordingOverlay" class="recording-overlay hidden">
+            <div class="pulse"></div>
+            <span>Recording...</span>
+            <button id="stopBtn" class="btn btn-danger">Stop</button>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

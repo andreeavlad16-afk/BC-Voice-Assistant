@@ -1,5 +1,11 @@
-const FormData = require('form-data');
-const fetch = require('node-fetch');
+let FormData, fetch;
+
+try {
+    FormData = require('form-data');
+    fetch = require('node-fetch');
+} catch (err) {
+    console.error('Failed to load dependencies:', err.message);
+}
 
 /**
  * Azure Function: Audio Transcription Proxy
@@ -12,36 +18,19 @@ module.exports = async function (context, req) {
     context.log('Transcription request received');
 
     try {
+        if (!FormData || !fetch) {
+            throw new Error('Required dependencies (form-data, node-fetch) are not installed. Please ensure package.json dependencies are installed.');
+        }
         const body = req.body;
         const { audioData, mimeType } = body;
 
         if (!audioData) {
             context.res = {
                 status: 400,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ error: 'No audio data provided' })
+                jsonBody: { error: 'No audio data provided' }
             };
             return;
         }
-
-        // Check if Whisper is configured
-        const useAzureOpenAI = process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_KEY && process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT;
-        const useOpenAI = process.env.OPENAI_API_KEY;
-
-        if (!useAzureOpenAI && !useOpenAI) {
-            context.log('❌ No Whisper API configured');
-            context.res = {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    error: 'Whisper transcription not configured',
-                    details: 'Missing AZURE_OPENAI_WHISPER_DEPLOYMENT or OPENAI_API_KEY'
-                })
-            };
-            return;
-        }
-
-        context.log(`Using ${useAzureOpenAI ? 'Azure OpenAI' : 'OpenAI'} Whisper`);
 
         // Determine file extension from MIME type
         let extension = 'm4a';
@@ -65,16 +54,20 @@ module.exports = async function (context, req) {
         formData.append('language', 'en');
 
         // Choose API based on configuration
-        const apiUrl = useAzureOpenAI
-            ? `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT}/audio/transcriptions?api-version=2024-10-21`
-            : 'https://api.openai.com/v1/audio/transcriptions';
-
-        const headers = useAzureOpenAI
-            ? { 'api-key': process.env.AZURE_OPENAI_KEY }
-            : { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` };
-
-        context.log(`Whisper API URL: ${apiUrl}`);
-        context.log(`Audio size: ${audioBuffer.length} bytes, format: ${extension}`);
+        const useAzureOpenAI = process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_KEY && process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT;
+        
+        let apiUrl;
+        let headers;
+        
+        if (useAzureOpenAI) {
+            // Use Azure OpenAI Whisper deployment (requires separate Whisper model deployment)
+            apiUrl = `${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_WHISPER_DEPLOYMENT}/audio/transcriptions?api-version=2024-10-21`;
+            headers = { 'api-key': process.env.AZURE_OPENAI_KEY };
+        } else {
+            // Fall back to public OpenAI API (default behavior)
+            apiUrl = 'https://api.openai.com/v1/audio/transcriptions';
+            headers = { 'Authorization': `Bearer ${process.env.OPENAI_API_KEY}` };
+        }
 
         // Forward to Whisper API
         const response = await fetch(apiUrl, {
@@ -88,50 +81,35 @@ module.exports = async function (context, req) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            context.log(`❌ Whisper API error (${response.status}): ${errorText}`);
+            context.log(`❌ Whisper API error: ${errorText}`);
             context.res = {
                 status: response.status,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                jsonBody: { 
                     error: 'Transcription failed',
-                    details: errorText,
-                    statusCode: response.status,
-                    apiUrl: apiUrl.replace(/api-key=[^&]*/, 'api-key=***')
-                })
+                    details: errorText
+                }
             };
             return;
         }
 
         const result = await response.json();
         
-        context.log(`✅ Transcription successful: "${result.text}"`);
-        
-        const responseBody = {
-            text: result.text,
-            success: true
-        };
-        
-        const bodyString = JSON.stringify(responseBody);
-        context.log(`Response body string: ${bodyString}`);
-        
         context.res = {
             status: 200,
-            headers: { 
-                'Content-Type': 'application/json; charset=utf-8',
-                'Content-Length': Buffer.byteLength(bodyString, 'utf8').toString()
-            },
-            body: bodyString
+            jsonBody: {
+                text: result.text,
+                success: true
+            }
         };
 
     } catch (error) {
         context.log(`❌ Transcription error: ${error.message}`);
         context.res = {
             status: 500,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
+            jsonBody: { 
                 error: 'Internal server error',
                 message: error.message 
-            })
+            }
         };
     }
 };

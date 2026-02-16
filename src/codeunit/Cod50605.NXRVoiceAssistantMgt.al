@@ -83,6 +83,10 @@ codeunit 50605 "NXR Voice Assistant Mgt."
                             ResponseText := HandleUnsupportedQuery(StructuredQueryJson);
                             exit(ApplyDebug(ResponseText, DebugInfo));
                         end;
+                        if ExecutionModeToken.AsValue().AsText() = 'multistep' then begin
+                            ResponseText := HandleMultiStepQuery(StructuredQueryJson);
+                            exit(ApplyDebug(ResponseText, DebugInfo));
+                        end;
                     end;
 
                     case ExecutionMode of
@@ -387,6 +391,268 @@ codeunit 50605 "NXR Voice Assistant Mgt."
             exit('This type of query is not yet supported. Try asking for specific records, counts, or top/biggest queries.');
     end;
 
+    local procedure HandleMultiStepQuery(QueryJson: JsonObject): Text
+    var
+        DynamicQueryExecutor: Codeunit "NXR Voice Dynamic Query Exec.";
+        Step1Token: JsonToken;
+        Step1Query: JsonObject;
+        GuidanceToken: JsonToken;
+        GuidanceTemplate: Text;
+        ReasonToken: JsonToken;
+        Reason: Text;
+        ResultData: JsonObject;
+        RecordCount: Integer;
+        Step1Response: Text;
+        FinalResponse: Text;
+        SuggestedQuery: Text;
+    begin
+        // Get the first step query
+        if not QueryJson.Get('step1Query', Step1Token) then
+            exit('I understand this requires multiple steps, but I couldn''t determine the first step.');
+
+        if not Step1Token.IsObject() then
+            exit('Invalid multi-step query format.');
+
+        Step1Query := Step1Token.AsObject();
+
+        // Execute step 1
+        if not DynamicQueryExecutor.ExecuteStructuredQuery(Step1Query, ResultData, RecordCount, Step1Response) then
+            exit('I tried to start your multi-step query but encountered an error: ' + Step1Response);
+
+        // Get guidance template and reason
+        if QueryJson.Get('guidanceTemplate', GuidanceToken) then
+            GuidanceTemplate := GuidanceToken.AsValue().AsText();
+
+        if QueryJson.Get('reason', ReasonToken) then
+            Reason := ReasonToken.AsValue().AsText();
+
+        // Format the response with actual data
+        SuggestedQuery := FormatGuidanceWithData(GuidanceTemplate, ResultData);
+
+        // Build final response
+        FinalResponse := Step1Response;
+        if Reason <> '' then
+            FinalResponse += Format(NewLine) + Format(NewLine) + '📍 ' + Reason;
+        if SuggestedQuery <> '' then
+            FinalResponse += Format(NewLine) + Format(NewLine) + '💡 Next step: ' + SuggestedQuery;
+
+        exit(FinalResponse);
+    end;
+
+    local procedure FormatGuidanceWithData(Template: Text; ResultData: JsonObject): Text
+    var
+        FormattedText: Text;
+        EntityToken: JsonToken;
+        EntityKeys: List of [Text];
+        EntityKey: Text;
+    begin
+        FormattedText := Template;
+
+        // Generic processing: loop through all arrays in ResultData
+        // Process common entity types: items, customers, vendors, employees, locations, etc.
+        EntityKeys := ResultData.Keys();
+        foreach EntityKey in EntityKeys do begin
+            if ResultData.Get(EntityKey, EntityToken) then begin
+                if EntityToken.IsArray() then
+                    FormattedText := ProcessEntityArray(FormattedText, EntityKey, EntityToken.AsArray());
+            end;
+        end;
+
+        exit(FormattedText);
+    end;
+
+    local procedure ProcessEntityArray(Template: Text; EntityName: Text; EntityArray: JsonArray): Text
+    var
+        FormattedText: Text;
+        FirstRecord: JsonObject;
+        FirstToken: JsonToken;
+        FieldMappings: Dictionary of [Text, Text];
+    begin
+        FormattedText := Template;
+
+        // Define common field mappings for each entity type
+        FieldMappings := GetFieldMappings(EntityName);
+
+        // Replace first record fields (e.g., {itemNo}, {customerName})
+        if EntityArray.Count > 0 then begin
+            EntityArray.Get(0, FirstToken);
+            if FirstToken.IsObject() then begin
+                FirstRecord := FirstToken.AsObject();
+                FormattedText := ReplaceFirstRecordFields(FormattedText, EntityName, FirstRecord, FieldMappings);
+            end;
+        end;
+
+        // Replace list fields (e.g., {locationCities}, {vendorNames})
+        FormattedText := ReplaceListFields(FormattedText, EntityName, EntityArray, FieldMappings);
+
+        exit(FormattedText);
+    end;
+
+    local procedure GetFieldMappings(EntityName: Text): Dictionary of [Text, Text]
+    var
+        Mappings: Dictionary of [Text, Text];
+    begin
+        // Map singular entity names to their common fields
+        // Format: placeholderSuffix -> jsonFieldName
+        case EntityName of
+            'items':
+                begin
+                    Mappings.Add('No', 'no');
+                    Mappings.Add('Description', 'description');
+                    Mappings.Add('UnitPrice', 'unitPrice');
+                end;
+            'customers':
+                begin
+                    Mappings.Add('No', 'no');
+                    Mappings.Add('Name', 'name');
+                    Mappings.Add('City', 'city');
+                    Mappings.Add('Balance', 'balance');
+                end;
+            'vendors':
+                begin
+                    Mappings.Add('No', 'no');
+                    Mappings.Add('Name', 'name');
+                    Mappings.Add('City', 'city');
+                end;
+            'employees':
+                begin
+                    Mappings.Add('No', 'no');
+                    Mappings.Add('FirstName', 'firstName');
+                    Mappings.Add('LastName', 'lastName');
+                    Mappings.Add('JobTitle', 'jobTitle');
+                end;
+            'locations':
+                begin
+                    Mappings.Add('Code', 'code');
+                    Mappings.Add('Name', 'name');
+                    Mappings.Add('City', 'city');
+                end;
+        end;
+        exit(Mappings);
+    end;
+
+    local procedure ReplaceFirstRecordFields(Template: Text; EntityName: Text; FirstRecord: JsonObject; FieldMappings: Dictionary of [Text, Text]): Text
+    var
+        FormattedText: Text;
+        PlaceholderSuffix: Text;
+        FieldName: Text;
+        EntityPrefix: Text;
+        AllFieldKeys: List of [Text];
+        FieldKey: Text;
+    begin
+        FormattedText := Template;
+        EntityPrefix := GetEntityPrefix(EntityName);
+
+        // First, replace using predefined friendly mappings: e.g., {itemNo} for 'no' field
+        foreach PlaceholderSuffix in FieldMappings.Keys() do begin
+            FieldName := FieldMappings.Get(PlaceholderSuffix);
+            FormattedText := ReplaceJsonPlaceholder(FormattedText, EntityPrefix + PlaceholderSuffix, FirstRecord, FieldName);
+        end;
+
+        // Second, replace ALL fields from the JSON directly: e.g., {itemQuantity}, {itemUnitPrice}, {itemValue}
+        // This allows AI to reference any field without us hardcoding it
+        AllFieldKeys := FirstRecord.Keys();
+        foreach FieldKey in AllFieldKeys do begin
+            // Convert field name to placeholder format: 'unitPrice' -> 'UnitPrice'
+            PlaceholderSuffix := ToPascalCase(FieldKey);
+            FormattedText := ReplaceJsonPlaceholder(FormattedText, EntityPrefix + PlaceholderSuffix, FirstRecord, FieldKey);
+        end;
+
+        exit(FormattedText);
+    end;
+
+    local procedure ReplaceListFields(Template: Text; EntityName: Text; EntityArray: JsonArray; FieldMappings: Dictionary of [Text, Text]): Text
+    var
+        FormattedText: Text;
+        PlaceholderSuffix: Text;
+        FieldName: Text;
+        EntityPrefix: Text;
+        FirstToken: JsonToken;
+        FirstRecord: JsonObject;
+        AllFieldKeys: List of [Text];
+        FieldKey: Text;
+    begin
+        FormattedText := Template;
+        EntityPrefix := GetEntityPrefix(EntityName);
+
+        // First, replace using predefined friendly mappings: e.g., {locationCities}
+        foreach PlaceholderSuffix in FieldMappings.Keys() do begin
+            FieldName := FieldMappings.Get(PlaceholderSuffix);
+            // Pluralize the placeholder: {locationCities} not {locationCity}
+            FormattedText := ReplaceWithListPlaceholder(FormattedText, EntityPrefix + PlaceholderSuffix + 's', EntityArray, FieldName);
+        end;
+
+        // Second, replace ALL fields from the JSON directly: e.g., {itemQuantitys}, {itemUnitPrices}
+        // Get field names from first record
+        if EntityArray.Count > 0 then begin
+            EntityArray.Get(0, FirstToken);
+            if FirstToken.IsObject() then begin
+                FirstRecord := FirstToken.AsObject();
+                AllFieldKeys := FirstRecord.Keys();
+                foreach FieldKey in AllFieldKeys do begin
+                    PlaceholderSuffix := ToPascalCase(FieldKey);
+                    FormattedText := ReplaceWithListPlaceholder(FormattedText, EntityPrefix + PlaceholderSuffix + 's', EntityArray, FieldKey);
+                end;
+            end;
+        end;
+
+        exit(FormattedText);
+    end;
+
+    local procedure GetEntityPrefix(EntityName: Text): Text
+    begin
+        // Convert plural entity name to singular prefix for placeholders
+        // "items" -> "item", "customers" -> "customer", "locations" -> "location"
+        case EntityName of
+            'items':
+                exit('item');
+            'customers':
+                exit('customer');
+            'vendors':
+                exit('vendor');
+            'employees':
+                exit('employee');
+            'locations':
+                exit('location');
+        end;
+        exit(EntityName); // fallback to original name
+    end;
+
+    local procedure ReplaceJsonPlaceholder(Template: Text; PlaceholderName: Text; DataObject: JsonObject; FieldName: Text): Text
+    var
+        FieldToken: JsonToken;
+        FieldValue: Text;
+    begin
+        if DataObject.Get(FieldName, FieldToken) then begin
+            FieldValue := FieldToken.AsValue().AsText();
+            exit(Template.Replace('{' + PlaceholderName + '}', FieldValue));
+        end;
+        exit(Template);
+    end;
+
+    local procedure ReplaceWithListPlaceholder(Template: Text; PlaceholderName: Text; DataArray: JsonArray; FieldName: Text): Text
+    var
+        ItemToken: JsonToken;
+        ItemObject: JsonObject;
+        FieldToken: JsonToken;
+        ValuesList: Text;
+        i: Integer;
+    begin
+        ValuesList := '';
+        for i := 0 to DataArray.Count - 1 do begin
+            DataArray.Get(i, ItemToken);
+            if ItemToken.IsObject() then begin
+                ItemObject := ItemToken.AsObject();
+                if ItemObject.Get(FieldName, FieldToken) then begin
+                    if ValuesList <> '' then
+                        ValuesList += ', ';
+                    ValuesList += FieldToken.AsValue().AsText();
+                end;
+            end;
+        end;
+        exit(Template.Replace('{' + PlaceholderName + '}', ValuesList));
+    end;
+
     local procedure GetJsonText(JObject: JsonObject; PropertyName: Text): Text
     var
         JToken: JsonToken;
@@ -395,5 +661,29 @@ codeunit 50605 "NXR Voice Assistant Mgt."
             if JToken.IsValue() then
                 exit(JToken.AsValue().AsText());
         exit('');
+    end;
+
+    local procedure ToPascalCase(FieldName: Text): Text
+    var
+        Result: Text;
+        i: Integer;
+        Char: Char;
+        NextCharUppercase: Boolean;
+    begin
+        Result := '';
+        NextCharUppercase := true;
+        for i := 1 to StrLen(FieldName) do begin
+            Char := FieldName[i];
+            if Char = '_' then
+                NextCharUppercase := true
+            else begin
+                if NextCharUppercase then begin
+                    Result += UpperCase(CopyStr(FieldName, i, 1));
+                    NextCharUppercase := false;
+                end else
+                    Result += CopyStr(FieldName, i, 1);
+            end;
+        end;
+        exit(Result);
     end;
 }

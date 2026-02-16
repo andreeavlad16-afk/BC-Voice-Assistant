@@ -5,3 +5,16 @@ azure-relay/
 .vscode/
 .git/
 output/
+node_modules/
+test-output.txt
+test-results/
+playwright-report/
+package-lock.json
+pwa/
+web-app/
+web-app-deploy/
+AzureBackend/
+infrastructure/
+tests/
+*.zip
+BC-Voice-Assistant-TEMP/

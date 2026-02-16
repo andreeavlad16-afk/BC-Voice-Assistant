@@ -3,15 +3,16 @@
  * Enables offline capability and PWA installation
  */
 
-const CACHE_NAME = 'bc-voice-assistant-v1';
+const CACHE_NAME = 'bc-voice-assistant-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
     '/app.js',
+    '/config.js',
+    '/signalr-client.js',
     '/styles.css',
     '/manifest.json',
-    '/icons/icon-192.png',
-    '/icons/icon-512.png'
+    '/icons/icon.svg'
 ];
 
 // Install event - cache assets

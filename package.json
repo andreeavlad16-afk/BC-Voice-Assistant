@@ -1,0 +1,35 @@
+{
+  "name": "bc-voice-assistant",
+  "version": "2.2.0",
+  "description": "Voice-activated AI assistant for Business Central with real-time SignalR, Azure OpenAI, and mobile PWA support",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:codegen": "playwright codegen http://localhost:3000",
+    "pwa:serve": "cd pwa && npx serve . -l 3000",
+    "lint": "eslint tests/**/*.ts"
+  },
+  "keywords": [
+    "business-central",
+    "voice-assistant",
+    "azure-openai",
+    "signalr",
+    "pwa",
+    "dynamics365"
+  ],
+  "author": "BC Voice Assistant Contributors",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.55.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
