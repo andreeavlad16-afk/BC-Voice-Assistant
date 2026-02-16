@@ -131,7 +131,20 @@ async function acquireToken() {
     const accounts = msalInstance.getAllAccounts();
     
     if (accounts.length === 0) {
-        throw new Error('No authenticated user found. Please sign in again.');
+        // No user logged in - trigger login popup
+        console.log('No accounts found - initiating login...');
+        const loginRequest = {
+            scopes: CONFIG.scopes
+        };
+        
+        try {
+            const loginResponse = await msalInstance.loginPopup(loginRequest);
+            accessToken = loginResponse.accessToken;
+            return accessToken;
+        } catch (loginError) {
+            console.error('Login failed:', loginError);
+            throw new Error('Sign-in cancelled or failed. Please try again.');
+        }
     }
     
     // Request access token with BC API scopes
