@@ -340,7 +340,10 @@ function addMessage(type, text) {
     const conversation = document.getElementById('conversation');
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}`;
-    messageDiv.innerHTML = `<p>${text}</p>`;
+    // Use textContent instead of innerHTML to prevent XSS
+    const p = document.createElement('p');
+    p.textContent = text;
+    messageDiv.appendChild(p);
     conversation.appendChild(messageDiv);
     conversation.scrollTop = conversation.scrollHeight;
 }
