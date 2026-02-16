@@ -16,12 +16,32 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator" role="progressbar">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
     <div class="app-container">
         <!-- Header -->
-        <header class="app-header">
+        <header class="app-header" role="banner">
+            <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Open menu">☰</button>
             <h1>🎤 BC Voice Assistant</h1>
-            <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
+            <div class="header-actions">
+                <button id="installBtn" class="install-btn hidden" aria-label="Install app">📥 Install</button>
+                <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
+            </div>
         </header>
+
+        <!-- Mobile Navigation -->
+        <nav id="mobileNav" class="mobile-nav hidden" role="navigation">
+            <button class="nav-close" aria-label="Close menu">✕</button>
+            <ul class="nav-menu">
+                <li><a href="#" data-action="settings">⚙️ Settings</a></li>
+                <li><a href="#" data-action="help">❓ Help</a></li>
+                <li><a href="#" data-action="about">ℹ️ About</a></li>
+            </ul>
+        </nav>
 
         <!-- Settings Panel (hidden by default) -->
         <div id="settingsPanel" class="settings-panel hidden">
@@ -99,6 +119,8 @@
     <!-- SignalR for real-time communication -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     
+    <!-- Auto-configuration for production deployment -->
+    <script src="config.js"></script>
     <script src="signalr-client.js"></script>
     <script src="app.js"></script>
 </body>

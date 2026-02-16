@@ -19,11 +19,17 @@ const CONFIG = {
         return `${this.bcEnvironment}/api/hackathon/voiceAssistant/v1.0/voiceCommands`;
     },
     
-    // Azure AD scopes - using basic OpenID scopes
+    // Azure AD scopes - Business Central API access
     get scopes() {
-        // Use basic OpenID scopes for authentication
-        // BC authorization is handled through the Entra Application Card
-        return ['openid', 'profile', 'email', 'offline_access'];
+        // Request BC API scope for authentication
+        // Format: https://api.businesscentral.dynamics.com/user_impersonation
+        // OR use the BC environment URL directly
+        if (this.bcEnvironment) {
+            // Use environment-specific scope (preferred for BC SaaS)
+            return [`${this.bcEnvironment}/.default`];
+        }
+        // Fallback to generic BC API scope
+        return ['https://api.businesscentral.dynamics.com/user_impersonation'];
     }
 };
 
@@ -93,7 +99,7 @@ function initializeMsal() {
         auth: {
             clientId: CONFIG.clientId,
             authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
-            redirectUri: window.location.origin + window.location.pathname
+            redirectUri: window.location.origin  // e.g., http://localhost:3000
         },
         cache: {
             cacheLocation: 'localStorage',
@@ -128,7 +134,7 @@ async function acquireToken() {
         throw new Error('No authenticated user found. Please sign in again.');
     }
     
-    // Just return the ID token - BC will authorize through Entra Application Card
+    // Request access token with BC API scopes
     const request = {
         scopes: CONFIG.scopes,
         account: accounts[0]
@@ -136,14 +142,14 @@ async function acquireToken() {
     
     try {
         const response = await msalInstance.acquireTokenSilent(request);
-        // Use the ID token for BC API calls
-        accessToken = response.idToken || response.accessToken;
+        // Use access token (not ID token) for BC API calls
+        accessToken = response.accessToken;
         return accessToken;
     } catch (error) {
         console.error('Token acquisition error:', error);
         try {
             const response = await msalInstance.acquireTokenPopup(request);
-            accessToken = response.idToken || response.accessToken;
+            accessToken = response.accessToken;
             return accessToken;
         } catch (popupError) {
             console.error('Popup token acquisition failed:', popupError);
@@ -448,6 +454,98 @@ function handleTextSubmit() {
 }
 
 // ============================================================================
+// PWA INSTALL HANDLING
+// ============================================================================
+let deferredInstallPrompt = null;
+
+function initializePWAInstall() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the mini-infobar from appearing on mobile
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        
+        // Show install button
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) {
+            installBtn.classList.remove('hidden');
+        }
+    });
+    
+    window.addEventListener('appinstalled', () => {
+        console.log('PWA was installed');
+        deferredInstallPrompt = null;
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) {
+            installBtn.classList.add('hidden');
+        }
+    });
+}
+
+async function handleInstallClick() {
+    if (!deferredInstallPrompt) {
+        return;
+    }
+    
+    // Show the install prompt
+    deferredInstallPrompt.prompt();
+    
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    console.log(`User response to install prompt: ${outcome}`);
+    
+    // Clear the deferred prompt
+    deferredInstallPrompt = null;
+    
+    // Hide the install button
+    const installBtn = document.getElementById('installBtn');
+    if (installBtn) {
+        installBtn.classList.add('hidden');
+    }
+}
+
+// ============================================================================
+// MOBILE MENU HANDLING
+// ============================================================================
+function toggleMobileMenu() {
+    const mobileNav = document.getElementById('mobileNav');
+    if (mobileNav) {
+        mobileNav.classList.toggle('hidden');
+    }
+}
+
+function handleNavAction(action) {
+    const mobileNav = document.getElementById('mobileNav');
+    if (mobileNav) {
+        mobileNav.classList.add('hidden');
+    }
+    
+    switch(action) {
+        case 'settings':
+            toggleSettings();
+            break;
+        case 'help':
+            addMessage('system', '🎤 Just tap the microphone and ask about your Business Central data! Try: "Show me top customers" or "What are my sales today?"');
+            break;
+        case 'about':
+            addMessage('system', '📱 BC Voice Assistant v2.2 - A voice-powered interface for Microsoft Dynamics 365 Business Central.');
+            break;
+    }
+}
+
+// ============================================================================
+// LOADING STATE MANAGEMENT
+// ============================================================================
+function hideLoadingIndicator() {
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    if (loadingIndicator) {
+        loadingIndicator.style.opacity = '0';
+        setTimeout(() => {
+            loadingIndicator.style.display = 'none';
+        }, 300);
+    }
+}
+
+// ============================================================================
 // INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -455,6 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeSpeechRecognition();
     initializeMsal();
     initializeRealTimeConnection();
+    initializePWAInstall();
     
     // Event listeners
     document.getElementById('micButton').addEventListener('click', toggleListening);
@@ -466,6 +565,34 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sendTextBtn').addEventListener('click', handleTextSubmit);
     document.getElementById('textInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handleTextSubmit();
+    });
+    
+    // PWA Install button
+    const installBtn = document.getElementById('installBtn');
+    if (installBtn) {
+        installBtn.addEventListener('click', handleInstallClick);
+    }
+    
+    // Mobile menu
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+    }
+    
+    const navClose = document.querySelector('.nav-close');
+    if (navClose) {
+        navClose.addEventListener('click', toggleMobileMenu);
+    }
+    
+    // Nav menu actions
+    document.querySelectorAll('.nav-menu a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const action = e.currentTarget.dataset.action;
+            if (action) {
+                handleNavAction(action);
+            }
+        });
     });
     
     // Load voices for speech synthesis
@@ -488,4 +615,9 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(reg => console.log('Service Worker registered'))
             .catch(err => console.log('Service Worker registration failed:', err));
     }
+    
+    // Hide loading indicator when everything is ready
+    window.addEventListener('load', () => {
+        setTimeout(hideLoadingIndicator, 500);
+    });
 });
