@@ -80,6 +80,14 @@ function handleConnectionStatusChange(status, message) {
 }
 
 // ============================================================================
+// MOBILE DETECTION
+// ============================================================================
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+}
+
+// ============================================================================
 // MSAL (Microsoft Authentication Library) Setup
 // ============================================================================
 let msalInstance = null;
@@ -106,12 +114,17 @@ function initializeMsal() {
     
     msalInstance = new msal.PublicClientApplication(msalConfig);
     
-    // Handle redirect response
+    // Handle redirect response (critical for mobile)
     msalInstance.handleRedirectPromise()
         .then(response => {
             if (response) {
                 accessToken = response.accessToken;
-                updateConnectionStatus('connected', 'Connected to Business Central');
+                updateConnectionStatus('connected', '✅ Signed in successfully!');
+                // Close settings panel after successful mobile login
+                setTimeout(() => {
+                    const panel = document.getElementById('settingsPanel');
+                    if (panel) panel.classList.add('hidden');
+                }, 1500);
             }
         })
         .catch(error => {
@@ -147,13 +160,27 @@ async function acquireToken() {
         return accessToken;
     } catch (error) {
         console.error('Token acquisition error:', error);
-        try {
-            const response = await msalInstance.acquireTokenPopup(request);
-            accessToken = response.accessToken;
-            return accessToken;
-        } catch (popupError) {
-            console.error('Popup token acquisition failed:', popupError);
-            throw popupError;
+        
+        // Try interactive token acquisition
+        if (isMobileDevice()) {
+            // Mobile: Use redirect
+            const tokenRequest = {
+                ...request,
+                redirectUri: window.location.origin
+            };
+            await msalInstance.acquireTokenRedirect(tokenRequest);
+            // Will redirect - code after this won't execute
+            throw new Error('Redirecting to sign in...');
+        } else {
+            // Desktop: Use popup
+            try {
+                const response = await msalInstance.acquireTokenPopup(request);
+                accessToken = response.accessToken;
+                return accessToken;
+            } catch (popupError) {
+                console.error('Popup token acquisition failed:', popupError);
+                throw popupError;
+            }
         }
     }
 }
@@ -425,17 +452,31 @@ function saveSettings() {
         initializeRealTimeConnection();
     }
     
-    // Try to connect
-    acquireToken()
-        .then(() => {
-            updateConnectionStatus('connected', 'Successfully connected!');
-            setTimeout(() => {
-                document.getElementById('settingsPanel').classList.add('hidden');
-            }, 1500);
-        })
-        .catch(error => {
-            updateConnectionStatus('error', 'Connection failed: ' + error.message);
+    // Try to connect (use redirect for mobile, popup for desktop)
+    if (isMobileDevice()) {
+        // Mobile: Use redirect flow
+        updateConnectionStatus('connecting', '🔄 Redirecting to sign in...');
+        const loginRequest = {
+            scopes: CONFIG.scopes,
+            redirectUri: window.location.origin
+        };
+        msalInstance.loginRedirect(loginRequest).catch(error => {
+            console.error('Mobile login redirect failed:', error);
+            updateConnectionStatus('error', 'Sign-in failed: ' + error.message);
         });
+    } else {
+        // Desktop: Use popup flow
+        acquireToken()
+            .then(() => {
+                updateConnectionStatus('connected', 'Successfully connected!');
+                setTimeout(() => {
+                    document.getElementById('settingsPanel').classList.add('hidden');
+                }, 1500);
+            })
+            .catch(error => {
+                updateConnectionStatus('error', 'Connection failed: ' + error.message);
+            });
+    }
 }
 
 function toggleSettings() {
