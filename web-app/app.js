@@ -820,13 +820,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show debug menu if ?debug=true in URL or localStorage debug mode enabled
     const urlParams = new URLSearchParams(window.location.search);
     const debugParam = urlParams.get('debug');
-    const debugMode = debugParam === 'true' || localStorage.getItem('debugMode') === 'true';
     
+    // Process URL parameter first to update localStorage
     if (debugParam === 'true') {
         localStorage.setItem('debugMode', 'true');
     } else if (debugParam === 'false') {
         localStorage.removeItem('debugMode');
     }
+    
+    // Then check the current debug mode state
+    const debugMode = localStorage.getItem('debugMode') === 'true';
     
     const debugMenuItem = document.getElementById('debugMenuItem');
     if (debugMenuItem) {
