@@ -98,7 +98,10 @@ function initializeMsal() {
     const msalConfig = {
         auth: {
             clientId: CONFIG.clientId,
-            authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`,
+            // Use "common" to support multi-tenant authentication
+            // This allows users from any Azure AD tenant to authenticate
+            // The specific tenant access is controlled by the BC API scope
+            authority: 'https://login.microsoftonline.com/common',
             redirectUri: window.location.origin  // e.g., http://localhost:3000
         },
         cache: {
