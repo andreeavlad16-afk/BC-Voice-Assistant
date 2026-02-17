@@ -3,7 +3,7 @@
  * Enables offline capability and PWA installation
  */
 
-const CACHE_NAME = 'bc-voice-assistant-57-20260217';
+const CACHE_NAME = 'bc-voice-prod-58-20260217';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
