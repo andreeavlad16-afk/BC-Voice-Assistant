@@ -272,18 +272,15 @@ let pendingTTS = null;
 function speak(text) {
     if (!('speechSynthesis' in window)) {
         DEBUG.log('❌ Speech synthesis not supported');
-        console.warn('Speech synthesis not supported');
         return;
     }
     
     if (!text || text.trim().length === 0) {
         DEBUG.log('❌ Empty text provided');
-        console.warn('speak() called with empty text');
         return;
     }
     
     DEBUG.log(`📢 speak() called: "${text.substring(0, 50)}..."`);
-    console.log('speak() called with:', text.substring(0, 100));
     
     // iOS Safari: speechSynthesis.speak() hangs if not called from user gesture
     // Store text and show play button instead
@@ -316,7 +313,6 @@ function playTTS(text) {
     // Try to use Samantha or Victoria on iOS
     const voices = speechSynthesis.getVoices();
     DEBUG.log(`🎤 Available voices: ${voices.length}`);
-    console.log('Available voices:', voices.length);
     
     if (voices.length > 0) {
         const preferredVoice = voices.find(v => 
@@ -326,11 +322,9 @@ function playTTS(text) {
         if (preferredVoice) {
             utterance.voice = preferredVoice;
             DEBUG.log(`✓ Using voice: ${preferredVoice.name}`);
-            console.log('Using voice:', preferredVoice.name);
         } else {
             utterance.voice = voices[0];
             DEBUG.log(`⚠️ Voice not found, using: ${voices[0].name}`);
-            console.log('Preferred voice not found, using:', voices[0].name);
         }
     } else {
         DEBUG.log('⚠️ No voices available - using system default');
@@ -344,14 +338,12 @@ function playTTS(text) {
     
     utterance.onstart = () => {
         DEBUG.log('▶️ Speech started');
-        console.log('Speech started');
         updateStatus('speaking', 'Speaking...');
         hidePlayButton();
     };
     
     utterance.onend = () => {
         DEBUG.log('⏸️ Speech ended');
-        console.log('Speech ended');
         updateStatus('idle', 'Tap microphone to start');
         pendingTTS = null;
     };
@@ -360,7 +352,6 @@ function playTTS(text) {
     utterance.onresume = () => DEBUG.log('▶️ Speech resumed');
     
     DEBUG.log('→ Calling speechSynthesis.speak()');
-    console.log('Calling speechSynthesis.speak()');
     speechSynthesis.speak(utterance);
 }
 
@@ -715,10 +706,14 @@ function hideLoadingIndicator() {
 // DEBUG LOGGING FOR TTS (iOS troubleshooting)
 // ============================================================================
 const DEBUG = {
+    get enabled() {
+        return localStorage.getItem('debugMode') === 'true';
+    },
     logs: [],
     maxLogs: 50,
     
     log(message) {
+        if (!this.enabled) return; // Skip logging when debug mode disabled
         const timestamp = new Date().toLocaleTimeString();
         const entry = `[${timestamp}] ${message}`;
         this.logs.push(entry);
