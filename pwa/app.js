@@ -801,11 +801,20 @@ const DEBUG = {
         closeDebugBtn.addEventListener('click', toggleDebugPanel);
     }
     
-    // Hide debug menu on non-iOS devices
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    // Show debug menu if ?debug=true in URL or localStorage debug mode enabled
+    const urlParams = new URLSearchParams(window.location.search);
+    const debugParam = urlParams.get('debug');
+    const debugMode = debugParam === 'true' || localStorage.getItem('debugMode') === 'true';
+    
+    if (debugParam === 'true') {
+        localStorage.setItem('debugMode', 'true');
+    } else if (debugParam === 'false') {
+        localStorage.removeItem('debugMode');
+    }
+    
     const debugMenuItem = document.getElementById('debugMenuItem');
-    if (debugMenuItem && !isIOS) {
-        debugMenuItem.style.display = 'none';
+    if (debugMenuItem) {
+        debugMenuItem.style.display = debugMode ? 'block' : 'none';
     }
     
     // Show settings if not configured

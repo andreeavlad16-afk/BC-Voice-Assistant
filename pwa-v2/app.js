@@ -523,10 +523,19 @@ document.addEventListener('DOMContentLoaded', () => {
         closeDebugBtn.addEventListener('click', toggleDebugPanel);
     }
     
-    // Show debug button only on iOS
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    // Show debug button if ?debug=true in URL or localStorage debug mode enabled
+    const urlParams = new URLSearchParams(window.location.search);
+    const debugParam = urlParams.get('debug');
+    const debugMode = debugParam === 'true' || localStorage.getItem('debugMode') === 'true';
+    
+    if (debugParam === 'true') {
+        localStorage.setItem('debugMode', 'true');
+    } else if (debugParam === 'false') {
+        localStorage.removeItem('debugMode');
+    }
+    
     const debugBtn = document.getElementById('debugBtn');
-    if (debugBtn && isIOS) {
+    if (debugBtn && debugMode) {
         debugBtn.style.display = 'block';
         debugBtn.addEventListener('click', toggleDebugPanel);
     }
