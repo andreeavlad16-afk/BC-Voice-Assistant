@@ -5,10 +5,27 @@
 
 const fetch = require('node-fetch');
 
+function buildBcVoiceApiUrl(functionKey) {
+    const baseUrl = process.env.BC_ENVIRONMENT_URL;
+    const companyId = process.env.BC_COMPANY_ID;
+    const companyName = process.env.BC_COMPANY_NAME || process.env.BC_COMPANY;
+
+    if (companyId) {
+        return `${baseUrl}/api/hackathon/voiceAssistant/v1.0/companies(${companyId})/voiceCommands?code=${functionKey}`;
+    }
+
+    if (companyName) {
+        const encodedCompany = encodeURIComponent(companyName);
+        return `${baseUrl}/api/hackathon/voiceAssistant/v1.0/voiceCommands?company=${encodedCompany}&code=${functionKey}`;
+    }
+
+    return `${baseUrl}/api/hackathon/voiceAssistant/v1.0/voiceCommands?code=${functionKey}`;
+}
+
 async function callBCVoiceAPI(queryText, functionKey) {
     // Use BC Function App endpoint with function key authentication
     // This is service-to-service, not user authentication
-    const apiUrl = `${process.env.BC_ENVIRONMENT_URL}/api/hackathon/voiceAssistant/v1.0/voiceCommands?code=${functionKey}`;
+    const apiUrl = buildBcVoiceApiUrl(functionKey);
     
     const response = await fetch(apiUrl, {
         method: 'POST',

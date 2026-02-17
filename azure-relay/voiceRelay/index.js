@@ -125,15 +125,19 @@ async function callBCVoiceAPI(queryText, context) {
 
     const bcEnvironmentUrl = process.env.BC_ENVIRONMENT_URL;
     const bcCompanyId = process.env.BC_COMPANY_ID;
+    const bcCompanyName = process.env.BC_COMPANY_NAME || process.env.BC_COMPANY;
 
     if (!bcEnvironmentUrl) {
         throw new Error('BC_ENVIRONMENT_URL not configured');
     }
 
-    // Build URL with or without company ID
+    // Build URL with company ID or company name when available
     let apiUrl;
     if (bcCompanyId) {
         apiUrl = `${bcEnvironmentUrl}/api/hackathon/voiceAssistant/v1.0/companies(${bcCompanyId})/voiceCommands`;
+    } else if (bcCompanyName) {
+        const encodedCompany = encodeURIComponent(bcCompanyName);
+        apiUrl = `${bcEnvironmentUrl}/api/hackathon/voiceAssistant/v1.0/voiceCommands?company=${encodedCompany}`;
     } else {
         apiUrl = `${bcEnvironmentUrl}/api/hackathon/voiceAssistant/v1.0/voiceCommands`;
     }

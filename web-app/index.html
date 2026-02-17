@@ -28,7 +28,7 @@
         <!-- Header -->
         <header class="app-header" role="banner">
             <button id="mobileMenuBtn" class="mobile-menu-btn" aria-label="Open menu">☰</button>
-            <h1>🎤 BC Voice Assistant <span class="version" style="font-size: 0.5em; color: #666; font-weight: normal;">v2.2.47</span></h1>
+            <h1>🎤 BC Voice Assistant <span class="version" style="font-size: 0.5em; color: #666; font-weight: normal;">v2.2.48</span></h1>
             <div class="header-actions">
                 <button id="installBtn" class="install-btn hidden" aria-label="Install app">📥 Install</button>
                 <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
@@ -51,6 +51,11 @@
             <div class="form-group">
                 <label for="bcEnvironment">BC Environment URL</label>
                 <input type="url" id="bcEnvironment" placeholder="https://businesscentral.dynamics.com/tenant/environment" />
+            </div>
+            <div class="form-group">
+                <label for="companyName">Company Name</label>
+                <input type="text" id="companyName" placeholder="CRONUS UK Ltd." />
+                <small class="form-hint">Must match the Business Central company name exactly</small>
             </div>
             <div class="form-group">
                 <label for="clientId">Azure AD Client ID</label>

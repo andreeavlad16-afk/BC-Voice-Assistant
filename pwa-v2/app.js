@@ -138,16 +138,57 @@ function escapeHtml(text) {
 // SPEECH SYNTHESIS (Text-to-Speech)
 // ============================================================================
 function speak(text) {
-    if (!('speechSynthesis' in window) || !text) return;
+    if (!('speechSynthesis' in window) || !text) {
+        console.warn('Speech synthesis not supported or empty text');
+        return;
+    }
+    
     speechSynthesis.cancel();
+    
     const utt = new SpeechSynthesisUtterance(text);
-    utt.rate = 1.0;
+    utt.rate = 0.9;
     utt.pitch = 1.0;
+    utt.volume = 1.0;
+    
+    // iOS requires voices to be loaded first
+    // Prefer Samantha or Victoria on iOS
     const voices = speechSynthesis.getVoices();
     const preferred = voices.find(v =>
-        v.name.includes('Samantha') || v.name.includes('Google') || v.name.includes('Microsoft')
+        v.name.includes('Samantha') ||
+        v.name.includes('Victoria') ||
+        v.name.includes('Google') ||
+        v.lang.startsWith('en-US')
     );
     if (preferred) utt.voice = preferred;
+    
+    // Handle voice loading on iOS
+    if (voices.length === 0) {
+        speechSynthesis.onvoiceschanged = () => {
+            const loaded = speechSynthesis.getVoices();
+            const loadedPref = loaded.find(v =>
+                v.name.includes('Samantha') ||
+                v.name.includes('Victoria') ||
+                v.name.includes('Google') ||
+                v.lang.startsWith('en-US')
+            );
+            if (loadedPref) utt.voice = loadedPref;
+        };
+    }
+    
+    utt.onerror = (event) => {
+        console.error('TTS error:', event.error);
+    };
+    
+    // Resume audio context if needed
+    try {
+        const ctx = window.audioContext || new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx && ctx.state === 'suspended') {
+            ctx.resume();
+        }
+    } catch (e) {
+        // Not critical
+    }
+    
     speechSynthesis.speak(utt);
 }
 

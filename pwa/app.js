@@ -13,11 +13,15 @@ const CONFIG = {
     tenantId: localStorage.getItem('bc_tenantId') || '',
     bcEnvironment: localStorage.getItem('bc_environment') || '',
     relayUrl: localStorage.getItem('bc_relayUrl') || '',
+    companyName: localStorage.getItem('bc_company') || 'CRONUS UK Ltd.',
     
     // BC API endpoint
     get apiEndpoint() {
         // Add company parameter to avoid "default company cannot be found" error
-        return `${this.bcEnvironment}/api/hackathon/voiceAssistant/v1.0/voiceCommands?company=CRONUS UK Ltd.`;
+        const companyParam = this.companyName
+            ? `?company=${encodeURIComponent(this.companyName)}`
+            : '';
+        return `${this.bcEnvironment}/api/hackathon/voiceAssistant/v1.0/voiceCommands${companyParam}`;
     },
     
     // Azure AD scopes - Business Central API access
@@ -273,23 +277,55 @@ function speak(text) {
     speechSynthesis.cancel();
     
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
+    utterance.rate = 0.9;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
     
-    // Try to use a good voice
+    // iOS requires voices to be loaded first
+    // On iOS, prefer 'Samantha' or other US English voice
     const voices = speechSynthesis.getVoices();
     const preferredVoice = voices.find(v => 
-        v.name.includes('Google') || 
         v.name.includes('Samantha') || 
-        v.name.includes('Microsoft')
+        v.name.includes('Victoria') || 
+        v.name.includes('Google') || 
+        v.lang.startsWith('en-US')
     );
     if (preferredVoice) {
         utterance.voice = preferredVoice;
     }
     
+    // Handle voice loading on iOS
+    if (voices.length === 0) {
+        speechSynthesis.onvoiceschanged = () => {
+            const loadedVoices = speechSynthesis.getVoices();
+            const loadedPreferred = loadedVoices.find(v =>
+                v.name.includes('Samantha') ||
+                v.name.includes('Victoria') ||
+                v.name.includes('Google') ||
+                v.lang.startsWith('en-US')
+            );
+            if (loadedPreferred) {
+                utterance.voice = loadedPreferred;
+            }
+        };
+    }
+    
+    utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event.error);
+    };
+    
     utterance.onstart = () => updateStatus('speaking', 'Speaking...');
     utterance.onend = () => updateStatus('idle', 'Tap microphone to start');
+    
+    // iOS may require audio context to be active
+    try {
+        const audioContext = window.audioContext || new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    } catch (e) {
+        // Audio context not critical for Web Speech API
+    }
     
     speechSynthesis.speak(utterance);
 }
@@ -408,6 +444,7 @@ function updateConnectionStatus(state, message) {
 // ============================================================================
 function loadSettings() {
     document.getElementById('bcEnvironment').value = CONFIG.bcEnvironment;
+    document.getElementById('companyName').value = CONFIG.companyName;
     document.getElementById('clientId').value = CONFIG.clientId;
     document.getElementById('tenantId').value = CONFIG.tenantId;
     document.getElementById('relayUrl').value = CONFIG.relayUrl;
@@ -415,6 +452,7 @@ function loadSettings() {
 
 function saveSettings() {
     const bcEnvironment = document.getElementById('bcEnvironment').value.trim();
+    const companyName = document.getElementById('companyName').value.trim();
     const clientId = document.getElementById('clientId').value.trim();
     const tenantId = document.getElementById('tenantId').value.trim();
     const relayUrl = document.getElementById('relayUrl').value.trim();
@@ -424,11 +462,13 @@ function saveSettings() {
     const cleanRelayUrl = relayUrl.replace(/\/$/, '');
     
     localStorage.setItem('bc_environment', cleanBcUrl);
+    localStorage.setItem('bc_company', companyName);
     localStorage.setItem('bc_clientId', clientId);
     localStorage.setItem('bc_tenantId', tenantId);
     localStorage.setItem('bc_relayUrl', cleanRelayUrl);
     
     CONFIG.bcEnvironment = cleanBcUrl;
+    CONFIG.companyName = companyName;
     CONFIG.clientId = clientId;
     CONFIG.tenantId = tenantId;
     CONFIG.relayUrl = cleanRelayUrl;
