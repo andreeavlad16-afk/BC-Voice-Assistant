@@ -7,8 +7,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0078d4">
     <meta name="description" content="Voice Assistant for Business Central">
-    <title>BC Voice Assistant v2.2.9</title>
-    <meta name="version" content="2.2.9">
+    <title>BC Voice Assistant v2.2.10</title>
+    <meta name="version" content="2.2.10">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192.png">
     <link rel="stylesheet" href="styles.css">
@@ -17,9 +17,19 @@
     <div class="app-container">
         <!-- Header -->
         <header class="app-header">
-            <h1>🎤 BC Voice Assistant <span style="font-size:0.7em;color:#fff;background:#0078d4;padding:2px 8px;border-radius:8px;margin-left:8px;">v2.2.9</span></h1>
+            <h1>🎤 BC Voice Assistant <span style="font-size:0.7em;color:#fff;background:#0078d4;padding:2px 8px;border-radius:8px;margin-left:8px;">v2.2.10</span></h1>
             <button id="settingsBtn" class="settings-btn" aria-label="Settings">⚙️</button>
         </header>
+
+        <!-- Debug Panel for TTS Troubleshooting -->
+        <div id="debugPanel" class="debug-panel hidden" style="background:#000;color:#0f0;padding:12px;font-family:monospace;font-size:11px;max-height:300px;overflow-y:auto;border:2px solid #0f0;position:fixed;bottom:80px;left:10px;right:10px;z-index:999;border-radius:4px;box-shadow:0 0 10px rgba(0,255,0,0.3);">
+            <div style="margin-bottom:8px;border-bottom:1px solid #0f0;padding-bottom:4px;">
+                <strong>🔍 TTS Debug Console</strong>
+                <button id="closeDebugBtn" style="float:right;background:none;border:none;color:#0f0;cursor:pointer;">✕</button>
+            </div>
+            <div id="voiceInfo" style="margin-bottom:8px;padding:4px;background:#111;"></div>
+            <div id="ttsLog" style="margin-top:8px;max-height:200px;overflow-y:auto;"></div>
+        </div>
 
         <!-- Settings Panel -->
         <div id="settingsPanel" class="settings-panel hidden">

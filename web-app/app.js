@@ -269,15 +269,18 @@ function toggleListening() {
 // ============================================================================
 function speak(text) {
     if (!('speechSynthesis' in window)) {
+        DEBUG.log('❌ Speech synthesis not supported');
         console.warn('Speech synthesis not supported');
         return;
     }
     
     if (!text || text.trim().length === 0) {
+        DEBUG.log('❌ Empty text provided');
         console.warn('speak() called with empty text');
         return;
     }
     
+    DEBUG.log(`📢 speak() called: "${text.substring(0, 50)}..."`);
     console.log('speak() called with:', text.substring(0, 100));
     
     // Pre-load voices on iOS
@@ -290,6 +293,7 @@ function speak(text) {
     
     // Try to use Samantha or Victoria on iOS
     const voices = speechSynthesis.getVoices();
+    DEBUG.log(`🎤 Available voices: ${voices.length}`);
     console.log('Available voices:', voices.length);
     
     if (voices.length > 0) {
@@ -299,24 +303,38 @@ function speak(text) {
         );
         if (preferredVoice) {
             utterance.voice = preferredVoice;
+            DEBUG.log(`✓ Using voice: ${preferredVoice.name}`);
             console.log('Using voice:', preferredVoice.name);
+        } else {
+            utterance.voice = voices[0];
+            DEBUG.log(`⚠️ Voice not found, using: ${voices[0].name}`);
+            console.log('Preferred voice not found, using:', voices[0].name);
         }
+    } else {
+        DEBUG.log('⚠️ No voices available - using system default');
     }
     
     utterance.onerror = (event) => {
+        DEBUG.log(`❌ TTS Error: ${event.error}`);
         console.error('Speech synthesis error:', event.error);
     };
     
     utterance.onstart = () => {
+        DEBUG.log('▶️ Speech started');
         console.log('Speech started');
         updateStatus('speaking', 'Speaking...');
     };
     
     utterance.onend = () => {
+        DEBUG.log('⏸️ Speech ended');
         console.log('Speech ended');
         updateStatus('idle', 'Tap microphone to start');
     };
     
+    utterance.onpause = () => DEBUG.log('⏸️ Speech paused');
+    utterance.onresume = () => DEBUG.log('▶️ Speech resumed');
+    
+    DEBUG.log('→ Calling speechSynthesis.speak()');
     console.log('Calling speechSynthesis.speak()');
     speechSynthesis.speak(utterance);
 }
@@ -518,6 +536,16 @@ function toggleSettings() {
     }
 }
 
+function toggleDebugPanel() {
+    const panel = document.getElementById('debugPanel');
+    const wasHidden = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+    if (wasHidden) {
+        DEBUG.showVoices();
+        DEBUG.log('=== Debug Panel Opened ===');
+    }
+}
+
 // ============================================================================
 // TEXT INPUT HANDLING
 // ============================================================================
@@ -607,6 +635,9 @@ function handleNavAction(action) {
         case 'about':
             addMessage('system', '📱 BC Voice Assistant v2.2 - A voice-powered interface for Microsoft Dynamics 365 Business Central.');
             break;
+        case 'debug':
+            toggleDebugPanel();
+            break;
     }
 }
 
@@ -622,6 +653,50 @@ function hideLoadingIndicator() {
         }, 300);
     }
 }
+
+// ============================================================================
+// DEBUG LOGGING FOR TTS (iOS troubleshooting)
+// ============================================================================
+const DEBUG = {
+    logs: [],
+    maxLogs: 50,
+    
+    log(message) {
+        const timestamp = new Date().toLocaleTimeString();
+        const entry = `[${timestamp}] ${message}`;
+        this.logs.push(entry);
+        if (this.logs.length > this.maxLogs) {
+            this.logs.shift();
+        }
+        this.updateUI();
+    },
+    
+    updateUI() {
+        const logPanel = document.getElementById('ttsLog');
+        if (logPanel) {
+            logPanel.innerHTML = this.logs
+                .map(log => `<div>${log}</div>`)
+                .join('');
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+    },
+    
+    showVoices() {
+        const voices = speechSynthesis.getVoices();
+        const voiceInfo = document.getElementById('voiceInfo');
+        if (voiceInfo) {
+            if (voices.length === 0) {
+                voiceInfo.innerHTML = '<div style="color:#f00;">❌ No voices available!</div>';
+            } else {
+                const voiceList = voices
+                    .map((v, i) => `${i+1}. ${v.name} (${v.lang}${v.default ? ' [DEFAULT]' : ''})`) 
+                    .join('<br>');
+                voiceInfo.innerHTML = `<div>✓ Found ${voices.length} voices:<br>${voiceList}</div>`;
+            }
+        }
+        this.log(`Voices loaded: ${voices.length}`);
+    }
+};
 
 // ============================================================================
 // INITIALIZATION
@@ -677,6 +752,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if ('speechSynthesis' in window) {
         speechSynthesis.getVoices();
         speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    }
+    
+    // Debug panel close button
+    const closeDebugBtn = document.getElementById('closeDebugBtn') || document.getElementById('closedebugBtn');
+    if (closeDebugBtn) {
+        closeDebugBtn.addEventListener('click', toggleDebugPanel);
     }
     
     // Show settings if not configured

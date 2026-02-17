@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bc-voice-v2-229'; // bump version to force update
+const CACHE_NAME = 'bc-voice-v2-2210'; // bump version to force update
 const ASSETS = ['/', '/styles.css', '/app.js']; // do not cache index.html
 
 // Only cache static assets, not index.html

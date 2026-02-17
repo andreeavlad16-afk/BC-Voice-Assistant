@@ -66,6 +66,16 @@ function toggleSettings() {
     }
 }
 
+function toggleDebugPanel() {
+    const panel = document.getElementById('debugPanel');
+    const wasHidden = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+    if (wasHidden) {
+        DEBUG.showVoices();
+        DEBUG.log('=== Debug Panel Opened ===');
+    }
+}
+
 // ============================================================================
 // MESSAGES
 // ============================================================================
@@ -128,6 +138,50 @@ function removeProcessingMessage() {
     if (el) el.remove();
 }
 
+// ============================================================================
+// DEBUG LOGGING FOR TTS (iOS troubleshooting)
+// ============================================================================
+const DEBUG = {
+    logs: [],
+    maxLogs: 50,
+    
+    log(message) {
+        const timestamp = new Date().toLocaleTimeString();
+        const entry = `[${timestamp}] ${message}`;
+        this.logs.push(entry);
+        if (this.logs.length > this.maxLogs) {
+            this.logs.shift();
+        }
+        this.updateUI();
+    },
+    
+    updateUI() {
+        const logPanel = document.getElementById('ttsLog');
+        if (logPanel) {
+            logPanel.innerHTML = this.logs
+                .map(log => `<div>${log}</div>`)
+                .join('');
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+    },
+    
+    showVoices() {
+        const voices = speechSynthesis.getVoices();
+        const voiceInfo = document.getElementById('voiceInfo');
+        if (voiceInfo) {
+            if (voices.length === 0) {
+                voiceInfo.innerHTML = '<div style="color:#f00;">❌ No voices available!</div>';
+            } else {
+                const voiceList = voices
+                    .map((v, i) => `${i+1}. ${v.name} (${v.lang}${v.default ? ' [DEFAULT]' : ''})`) 
+                    .join('<br>');
+                voiceInfo.innerHTML = `<div>✓ Found ${voices.length} voices:<br>${voiceList}</div>`;
+            }
+        }
+        this.log(`Voices loaded: ${voices.length}`);
+    }
+};
+
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -139,10 +193,12 @@ function escapeHtml(text) {
 // ============================================================================
 function speak(text) {
     if (!('speechSynthesis' in window) || !text) {
+        DEBUG.log('❌ Speech synthesis not supported or empty text');
         console.warn('Speech synthesis not supported or empty text');
         return;
     }
     
+    DEBUG.log(`📢 speak() called: "${text.substring(0, 50)}..."`);
     console.log('speak() called with:', text.substring(0, 100));
     
     // Pre-load voices on iOS - critical for Safari
@@ -155,6 +211,7 @@ function speak(text) {
     
     // Get voices again after pre-load
     const voices = speechSynthesis.getVoices();
+    DEBUG.log(`🎤 Available voices: ${voices.length}`);
     console.log('Available voices:', voices.length);
     
     if (voices.length > 0) {
@@ -164,17 +221,35 @@ function speak(text) {
         );
         if (preferred) {
             utt.voice = preferred;
+            DEBUG.log(`✓ Using voice: ${preferred.name}`);
             console.log('Using voice:', preferred.name);
+        } else {
+            utt.voice = voices[0];
+            DEBUG.log(`⚠️ Voice not found, using: ${voices[0].name}`);
         }
+    } else {
+        DEBUG.log('⚠️ No voices available - using system default');
     }
     
     utt.onerror = (event) => {
+        DEBUG.log(`❌ TTS Error: ${event.error}`);
         console.error('TTS error:', event.error);
     };
     
-    utt.onstart = () => console.log('Speech started');
-    utt.onend = () => console.log('Speech ended');
+    utt.onstart = () => {
+        DEBUG.log('▶️ Speech started');
+        console.log('Speech started');
+    };
     
+    utt.onend = () => {
+        DEBUG.log('⏸️ Speech ended');
+        console.log('Speech ended');
+    };
+    
+    utt.onpause = () => DEBUG.log('⏸️ Speech paused');
+    utt.onresume = () => DEBUG.log('▶️ Speech resumed');
+    
+    DEBUG.log('→ Calling speechSynthesis.speak()');
     console.log('Calling speechSynthesis.speak()');
     speechSynthesis.speak(utt);
 }
@@ -389,6 +464,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if ('speechSynthesis' in window) {
         speechSynthesis.getVoices();
         speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+    }
+    
+    // Debug panel close button
+    const closeDebugBtn = document.getElementById('closeDebugBtn') || document.getElementById('closedebugBtn');
+    if (closeDebugBtn) {
+        closeDebugBtn.addEventListener('click', toggleDebugPanel);
     }
 
     // Always show mic button, but disable if not supported
