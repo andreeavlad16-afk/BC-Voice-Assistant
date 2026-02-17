@@ -412,6 +412,10 @@ html, body {
     display: none;
 }
 
+.debug-panel.hidden {
+    display: none !important;
+}
+
 .pulse-ring {
     position: absolute;
     width: 120px;

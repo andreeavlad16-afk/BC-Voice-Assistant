@@ -3,7 +3,7 @@
  * Enables offline capability and PWA installation
  */
 
-const CACHE_NAME = 'bc-voice-prod-60-20260217-hide-debug-panel';
+const CACHE_NAME = 'bc-voice-prod-61-20260217-debug-css';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
