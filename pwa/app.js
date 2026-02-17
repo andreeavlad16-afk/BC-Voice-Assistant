@@ -406,11 +406,14 @@ function saveSettings() {
     CONFIG.tenantId = tenantId;
     CONFIG.relayUrl = cleanRelayUrl;
     
-    // Clear any existing MSAL cache to avoid stale tokens
+    // Clear MSAL cache by clearing all auth-related localStorage
+    // This forces fresh authentication with new settings
     if (msalInstance) {
-        const accounts = msalInstance.getAllAccounts();
-        accounts.forEach(account => {
-            msalInstance.getTokenCache().removeAccount(account);
+        const keys = Object.keys(localStorage);
+        keys.forEach(key => {
+            if (key.startsWith('msal.')) {
+                localStorage.removeItem(key);
+            }
         });
     }
     
