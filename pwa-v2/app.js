@@ -522,6 +522,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closeDebugBtn) {
         closeDebugBtn.addEventListener('click', toggleDebugPanel);
     }
+    
+    // Show debug button only on iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const debugBtn = document.getElementById('debugBtn');
+    if (debugBtn && isIOS) {
+        debugBtn.style.display = 'block';
+        debugBtn.addEventListener('click', toggleDebugPanel);
+    }
 
     // Always show mic button, but disable if not supported
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {

@@ -801,6 +801,13 @@ const DEBUG = {
         closeDebugBtn.addEventListener('click', toggleDebugPanel);
     }
     
+    // Hide debug menu on non-iOS devices
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const debugMenuItem = document.getElementById('debugMenuItem');
+    if (debugMenuItem && !isIOS) {
+        debugMenuItem.style.display = 'none';
+    }
+    
     // Show settings if not configured
     if (!CONFIG.bcEnvironment || !CONFIG.clientId) {
         setTimeout(() => {
