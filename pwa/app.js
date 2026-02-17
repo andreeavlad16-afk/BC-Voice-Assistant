@@ -817,6 +817,14 @@ document.addEventListener('DOMContentLoaded', () => {
         debugMenuItem.style.display = debugMode ? 'block' : 'none';
     }
     
+    // **CRITICAL: Hide debug panel on load if not in debug mode**
+    const debugPanel = document.getElementById('debugPanel');
+    if (debugPanel) {
+        if (!debugMode) {
+            debugPanel.classList.add('hidden');
+        }
+    }
+    
     // Show settings if not configured
     if (!CONFIG.bcEnvironment || !CONFIG.clientId) {
         setTimeout(() => {
