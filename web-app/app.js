@@ -16,7 +16,8 @@ const CONFIG = {
     
     // BC API endpoint
     get apiEndpoint() {
-        return `${this.bcEnvironment}/api/hackathon/voiceAssistant/v1.0/voiceCommands`;
+        // Add company parameter to avoid "default company cannot be found" error
+        return `${this.bcEnvironment}/api/hackathon/voiceAssistant/v1.0/voiceCommands?company=CRONUS UK Ltd.`;
     },
     
     // Azure AD scopes - Business Central API access
