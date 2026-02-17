@@ -21,15 +21,10 @@ const CONFIG = {
     
     // Azure AD scopes - Business Central API access
     get scopes() {
-        // Request BC API scope for authentication
-        // Format: https://api.businesscentral.dynamics.com/user_impersonation
-        // OR use the BC environment URL directly
-        if (this.bcEnvironment) {
-            // Use environment-specific scope (preferred for BC SaaS)
-            return [`${this.bcEnvironment}/.default`];
-        }
-        // Fallback to generic BC API scope
-        return ['https://api.businesscentral.dynamics.com/user_impersonation'];
+        // IMPORTANT: Use generic BC API scope for multi-tenant authentication
+        // Using environment-specific scope (with tenant ID) causes tenant mismatch errors
+        // The generic scope works across all BC environments and tenants
+        return ['https://api.businesscentral.dynamics.com/.default'];
     }
 };
 
