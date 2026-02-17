@@ -273,16 +273,25 @@ function speak(text) {
         return;
     }
     
-    // Cancel any ongoing speech
-    speechSynthesis.cancel();
+    if (!text || text.trim().length === 0) {
+        console.warn('speak() called with empty text');
+        return;
+    }
+    
+    console.log('speak() called with:', text.substring(0, 100));
+    
+    // Pre-load voices on iOS
+    speechSynthesis.getVoices();
     
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
     
-    // Try to use a good voice - simple approach
+    // Try to use Samantha or Victoria on iOS
     const voices = speechSynthesis.getVoices();
+    console.log('Available voices:', voices.length);
+    
     if (voices.length > 0) {
         const preferredVoice = voices.find(v => 
             v.name.includes('Samantha') || 
@@ -290,6 +299,7 @@ function speak(text) {
         );
         if (preferredVoice) {
             utterance.voice = preferredVoice;
+            console.log('Using voice:', preferredVoice.name);
         }
     }
     
@@ -297,9 +307,17 @@ function speak(text) {
         console.error('Speech synthesis error:', event.error);
     };
     
-    utterance.onstart = () => updateStatus('speaking', 'Speaking...');
-    utterance.onend = () => updateStatus('idle', 'Tap microphone to start');
+    utterance.onstart = () => {
+        console.log('Speech started');
+        updateStatus('speaking', 'Speaking...');
+    };
     
+    utterance.onend = () => {
+        console.log('Speech ended');
+        updateStatus('idle', 'Tap microphone to start');
+    };
+    
+    console.log('Calling speechSynthesis.speak()');
     speechSynthesis.speak(utterance);
 }
 

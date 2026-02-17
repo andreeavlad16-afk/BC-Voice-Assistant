@@ -143,27 +143,39 @@ function speak(text) {
         return;
     }
     
-    speechSynthesis.cancel();
+    console.log('speak() called with:', text.substring(0, 100));
+    
+    // Pre-load voices on iOS - critical for Safari
+    speechSynthesis.getVoices();
     
     const utt = new SpeechSynthesisUtterance(text);
     utt.rate = 1.0;
     utt.pitch = 1.0;
     utt.volume = 1.0;
     
-    // Try to use Samantha or Victoria voice
+    // Get voices again after pre-load
     const voices = speechSynthesis.getVoices();
+    console.log('Available voices:', voices.length);
+    
     if (voices.length > 0) {
         const preferred = voices.find(v =>
             v.name.includes('Samantha') ||
             v.name.includes('Victoria')
         );
-        if (preferred) utt.voice = preferred;
+        if (preferred) {
+            utt.voice = preferred;
+            console.log('Using voice:', preferred.name);
+        }
     }
     
     utt.onerror = (event) => {
         console.error('TTS error:', event.error);
     };
     
+    utt.onstart = () => console.log('Speech started');
+    utt.onend = () => console.log('Speech ended');
+    
+    console.log('Calling speechSynthesis.speak()');
     speechSynthesis.speak(utt);
 }
 
