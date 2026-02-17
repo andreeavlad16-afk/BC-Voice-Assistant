@@ -267,6 +267,8 @@ function toggleListening() {
 // ============================================================================
 // SPEECH SYNTHESIS (Text-to-Speech)
 // ============================================================================
+let pendingTTS = null;
+
 function speak(text) {
     if (!('speechSynthesis' in window)) {
         DEBUG.log('❌ Speech synthesis not supported');
@@ -283,7 +285,27 @@ function speak(text) {
     DEBUG.log(`📢 speak() called: "${text.substring(0, 50)}..."`);
     console.log('speak() called with:', text.substring(0, 100));
     
-    // Pre-load voices on iOS
+    // iOS Safari: speechSynthesis.speak() hangs if not called from user gesture
+    // Store text and show play button instead
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+        DEBUG.log('📱 iOS detected - storing TTS for manual playback');
+        pendingTTS = text;
+        showPlayButton();
+        return;
+    }
+    
+    // Non-iOS: play immediately
+    playTTS(text);
+}
+
+function playTTS(text) {
+    DEBUG.log(`🔊 Playing TTS: "${text.substring(0, 50)}..."`);
+    
+    // Cancel any ongoing speech
+    speechSynthesis.cancel();
+    
+    // Pre-load voices
     speechSynthesis.getVoices();
     
     const utterance = new SpeechSynthesisUtterance(text);
@@ -317,18 +339,21 @@ function speak(text) {
     utterance.onerror = (event) => {
         DEBUG.log(`❌ TTS Error: ${event.error}`);
         console.error('Speech synthesis error:', event.error);
+        hidePlayButton();
     };
     
     utterance.onstart = () => {
         DEBUG.log('▶️ Speech started');
         console.log('Speech started');
         updateStatus('speaking', 'Speaking...');
+        hidePlayButton();
     };
     
     utterance.onend = () => {
         DEBUG.log('⏸️ Speech ended');
         console.log('Speech ended');
         updateStatus('idle', 'Tap microphone to start');
+        pendingTTS = null;
     };
     
     utterance.onpause = () => DEBUG.log('⏸️ Speech paused');
@@ -337,6 +362,38 @@ function speak(text) {
     DEBUG.log('→ Calling speechSynthesis.speak()');
     console.log('Calling speechSynthesis.speak()');
     speechSynthesis.speak(utterance);
+}
+
+function showPlayButton() {
+    let playBtn = document.getElementById('playTTSBtn');
+    if (!playBtn) {
+        playBtn = document.createElement('button');
+        playBtn.id = 'playTTSBtn';
+        playBtn.innerHTML = '🔊 Tap to play response';
+        playBtn.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0078d4;color:#fff;border:none;padding:12px 24px;border-radius:24px;font-size:16px;font-weight:bold;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:1000;cursor:pointer;animation:pulse 1.5s infinite;';
+        playBtn.onclick = () => {
+            if (pendingTTS) {
+                playTTS(pendingTTS);
+            }
+        };
+        document.body.appendChild(playBtn);
+        
+        // Add pulse animation
+        if (!document.getElementById('playBtnStyle')) {
+            const style = document.createElement('style');
+            style.id = 'playBtnStyle';
+            style.textContent = '@keyframes pulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } }';
+            document.head.appendChild(style);
+        }
+    }
+    playBtn.style.display = 'block';
+}
+
+function hidePlayButton() {
+    const playBtn = document.getElementById('playTTSBtn');
+    if (playBtn) {
+        playBtn.style.display = 'none';
+    }
 }
 
 // ============================================================================

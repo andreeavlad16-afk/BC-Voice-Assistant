@@ -3,7 +3,7 @@
  * Enables offline capability and PWA installation
  */
 
-const CACHE_NAME = 'bc-voice-assistant-v3-20260217-debug';
+const CACHE_NAME = 'bc-voice-assistant-v3-20260217-ios-tts';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
