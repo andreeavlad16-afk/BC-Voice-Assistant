@@ -277,37 +277,20 @@ function speak(text) {
     speechSynthesis.cancel();
     
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9;
+    utterance.rate = 1.0;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
     
-    // iOS requires voices to be loaded first
-    // On iOS, prefer 'Samantha' or other US English voice
+    // Try to use a good voice - simple approach
     const voices = speechSynthesis.getVoices();
-    const preferredVoice = voices.find(v => 
-        v.name.includes('Samantha') || 
-        v.name.includes('Victoria') || 
-        v.name.includes('Google') || 
-        v.lang.startsWith('en-US')
-    );
-    if (preferredVoice) {
-        utterance.voice = preferredVoice;
-    }
-    
-    // Handle voice loading on iOS
-    if (voices.length === 0) {
-        speechSynthesis.onvoiceschanged = () => {
-            const loadedVoices = speechSynthesis.getVoices();
-            const loadedPreferred = loadedVoices.find(v =>
-                v.name.includes('Samantha') ||
-                v.name.includes('Victoria') ||
-                v.name.includes('Google') ||
-                v.lang.startsWith('en-US')
-            );
-            if (loadedPreferred) {
-                utterance.voice = loadedPreferred;
-            }
-        };
+    if (voices.length > 0) {
+        const preferredVoice = voices.find(v => 
+            v.name.includes('Samantha') || 
+            v.name.includes('Victoria')
+        );
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
     }
     
     utterance.onerror = (event) => {
@@ -316,16 +299,6 @@ function speak(text) {
     
     utterance.onstart = () => updateStatus('speaking', 'Speaking...');
     utterance.onend = () => updateStatus('idle', 'Tap microphone to start');
-    
-    // iOS may require audio context to be active
-    try {
-        const audioContext = window.audioContext || new (window.AudioContext || window.webkitAudioContext)();
-        if (audioContext && audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
-    } catch (e) {
-        // Audio context not critical for Web Speech API
-    }
     
     speechSynthesis.speak(utterance);
 }
