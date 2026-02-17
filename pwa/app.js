@@ -737,7 +737,23 @@ const DEBUG = {
         const voices = speechSynthesis.getVoices();
         const voiceInfo = document.getElementById('voiceInfo');
         if (voiceInfo) {
-            if (voices.length === 0) {\n                voiceInfo.innerHTML = '<div style=\"color:#f00;\">❌ No voices available!</div>';\n            } else {\n                const voiceList = voices\n                    .map((v, i) => `${i+1}. ${v.name} (${v.lang}${v.default ? ' [DEFAULT]' : ''})`) \n                    .join('<br>');\n                voiceInfo.innerHTML = `<div>✓ Found ${voices.length} voices:<br>${voiceList}</div>`;\n            }\n        }\n        this.log(`Voices loaded: ${voices.length}`);\n    }\n};\n\n// ============================================================================\n// INITIALIZATION\n// ============================================================================\ndocument.addEventListener('DOMContentLoaded', () => {
+            if (voices.length === 0) {
+                voiceInfo.innerHTML = '<div style="color:#f00;">❌ No voices available!</div>';
+            } else {
+                const voiceList = voices
+                    .map((v, i) => `${i+1}. ${v.name} (${v.lang}${v.default ? ' [DEFAULT]' : ''})`) 
+                    .join('<br>');
+                voiceInfo.innerHTML = `<div>✓ Found ${voices.length} voices:<br>${voiceList}</div>`;
+            }
+        }
+        this.log(`Voices loaded: ${voices.length}`);
+    }
+};
+
+// ============================================================================
+// INITIALIZATION
+// ============================================================================
+document.addEventListener('DOMContentLoaded', () => {
     // Initialize components
     initializeSpeechRecognition();
     initializeMsal();
