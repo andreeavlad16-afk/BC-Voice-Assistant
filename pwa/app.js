@@ -271,22 +271,17 @@ let pendingTTS = null;
 
 function speak(text) {
     if (!('speechSynthesis' in window)) {
-        DEBUG.log('❌ Speech synthesis not supported');
         return;
     }
     
     if (!text || text.trim().length === 0) {
-        DEBUG.log('❌ Empty text provided');
         return;
     }
-    
-    DEBUG.log(`📢 speak() called: "${text.substring(0, 50)}..."`);
     
     // iOS Safari: speechSynthesis.speak() hangs if not called from user gesture
     // Store text and show play button instead
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (isIOS) {
-        DEBUG.log('📱 iOS detected - storing TTS for manual playback');
         pendingTTS = text;
         showPlayButton();
         return;
@@ -297,8 +292,6 @@ function speak(text) {
 }
 
 function playTTS(text) {
-    DEBUG.log(`🔊 Playing TTS: "${text.substring(0, 50)}..."`);
-    
     // Cancel any ongoing speech
     speechSynthesis.cancel();
     
@@ -310,9 +303,8 @@ function playTTS(text) {
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
     
-    // Try to use Samantha or Victoria on iOS
+    // Try to use Samantha or Victoria voice
     const voices = speechSynthesis.getVoices();
-    DEBUG.log(`🎤 Available voices: ${voices.length}`);
     
     if (voices.length > 0) {
         const preferredVoice = voices.find(v => 
@@ -321,37 +313,26 @@ function playTTS(text) {
         );
         if (preferredVoice) {
             utterance.voice = preferredVoice;
-            DEBUG.log(`✓ Using voice: ${preferredVoice.name}`);
         } else {
             utterance.voice = voices[0];
-            DEBUG.log(`⚠️ Voice not found, using: ${voices[0].name}`);
         }
-    } else {
-        DEBUG.log('⚠️ No voices available - using system default');
     }
     
     utterance.onerror = (event) => {
-        DEBUG.log(`❌ TTS Error: ${event.error}`);
         console.error('Speech synthesis error:', event.error);
         hidePlayButton();
     };
     
     utterance.onstart = () => {
-        DEBUG.log('▶️ Speech started');
         updateStatus('speaking', 'Speaking...');
         hidePlayButton();
     };
     
     utterance.onend = () => {
-        DEBUG.log('⏸️ Speech ended');
         updateStatus('idle', 'Tap microphone to start');
         pendingTTS = null;
     };
     
-    utterance.onpause = () => DEBUG.log('⏸️ Speech paused');
-    utterance.onresume = () => DEBUG.log('▶️ Speech resumed');
-    
-    DEBUG.log('→ Calling speechSynthesis.speak()');
     speechSynthesis.speak(utterance);
 }
 
