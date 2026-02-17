@@ -399,7 +399,12 @@ page 50611 "NXR Voice Assistant Setup"
             Rec."Fallback to Pattern Matching" := true;
             Rec."Max Tokens" := 500;
             Rec."Azure API Version" := '2024-02-15-preview';
+            Rec."API Endpoint" := 'https://func-bcvoice-v2.azurewebsites.net/api/transcribe';
             Rec.Insert();
+        end else if (Rec."API Endpoint" = '' OR Rec."API Endpoint".Contains('func-bcvoice-prod')) then begin
+            // Migrate from old endpoint to new v2 endpoint
+            Rec."API Endpoint" := 'https://func-bcvoice-v2.azurewebsites.net/api/transcribe';
+            Rec.Modify();
         end;
 
         UpdateVisibility();
