@@ -127,20 +127,10 @@ async function acquireToken() {
     const accounts = msalInstance.getAllAccounts();
     
     if (accounts.length === 0) {
-        // No user logged in - trigger login popup
-        console.log('No accounts found - initiating login...');
-        const loginRequest = {
-            scopes: CONFIG.scopes
-        };
-        
-        try {
-            const loginResponse = await msalInstance.loginPopup(loginRequest);
-            accessToken = loginResponse.accessToken;
-            return accessToken;
-        } catch (loginError) {
-            console.error('Login failed:', loginError);
-            throw new Error('Sign-in cancelled or failed. Please try again.');
-        }
+        // No user logged in - show error instead of auto-login
+        // Auto-login causes nested popup issues
+        console.log('No accounts found - user must sign in via Settings');
+        throw new Error('Please sign in first. Click Settings (⚙️) → Save & Connect');
     }
     
     // Request access token with BC API scopes
