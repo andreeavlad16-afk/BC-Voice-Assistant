@@ -1,9 +1,12 @@
 name: Playwright Tests
 
-# TEMPORARILY DISABLED - Tests need updating for recent auth changes
-# Re-enable after updating test expectations
 on:
-  workflow_dispatch: # Manual triggering only
+  push:
+    branches: [ main ]
+    paths:
+      - 'web-app/**'
+      - 'tests/**'
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   test:
@@ -78,7 +81,7 @@ jobs:
 
     - name: Start PWA Server
       run: |
-        cd pwa
+        cd web-app
         Start-Process powershell -ArgumentList "-Command", "npx serve . -l 3000" -WindowStyle Hidden
         Start-Sleep -Seconds 5
       shell: pwsh
