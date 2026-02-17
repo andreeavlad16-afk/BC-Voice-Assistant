@@ -801,9 +801,10 @@ const DEBUG = {
     const debugParam = urlParams.get('debug');
     
     // Process URL parameter first to update localStorage
+    // Default: remove debug mode unless explicitly enabled via URL
     if (debugParam === 'true') {
         localStorage.setItem('debugMode', 'true');
-    } else if (debugParam === 'false') {
+    } else {
         localStorage.removeItem('debugMode');
     }
     
