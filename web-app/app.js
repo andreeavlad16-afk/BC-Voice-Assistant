@@ -797,12 +797,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const debugParam = urlParams.get('debug');
     
-    // Process URL parameter first to update localStorage
-    // Default: remove debug mode unless explicitly enabled via URL
+    // **AGGRESSIVE DEBUG STATE CLEANUP**
+    // Always clear ALL debug keys from localStorage on page load
+    // This prevents old debug state from persisting across sessions
+    localStorage.removeItem('debugMode');
+    localStorage.removeItem('bc_debug');
+    localStorage.removeItem('debug');
+    
+    // Only re-enable if explicitly requested in URL
     if (debugParam === 'true') {
         localStorage.setItem('debugMode', 'true');
-    } else {
-        localStorage.removeItem('debugMode');
     }
     
     // Then check the current debug mode state
